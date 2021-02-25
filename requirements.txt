@@ -1,0 +1,6 @@
+numpy==1.19.4
+pandas==1.1.4
+yahoo_fin
+requests
+requests_html
+luno-python
