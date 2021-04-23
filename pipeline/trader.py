@@ -101,10 +101,10 @@ class ResearchPortfolio:
         self.cash = 1000
 
     def make_market_order(self, price):
-        if self.type == 'BUY':
+        if self.type == 'BUY' and self.cash > 0:
             self.coin = self.cash / price
             self.cash = 0
-        elif self.type == 'SELL':
+        elif self.type == 'SELL' and self.coin > 0:
             self.cash = price * self.coin
             self.coin = 0
         else:
