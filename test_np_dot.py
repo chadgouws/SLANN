@@ -1,14 +1,34 @@
 import numpy as np
+import pandas as pd
 
-from NN import sigmoid
+y = np.array([[1],
+              [0],
+              [0],
+              [1]])
+x = np.array([[1],
+              [1],
+              [0],
+              [0]])
+z = np.array([[0],
+              [1],
+              [1],
+              [0]])
+w = np.array([[0],
+              [0],
+              [1],
+              [1]])
 
-
-a = np.array([[1, 0, 3]])
-
-b = np.array([[4, 1, 4, 4],
-              [2, 1, 2, 1],
-              [1, 1, 1, 1]])
-print(a)
-print(b)
-print(np.dot(a, b))
-print(sigmoid(0.282238))
+df = pd.DataFrame()
+print(df)
+print('\n')
+df = df.append(pd.DataFrame(y).T, ignore_index=True)
+print(df)
+print('\n')
+df = df.append(pd.DataFrame(x).T, ignore_index=True)
+print(df)
+print('\n')
+df = df.append(pd.DataFrame(z).T, ignore_index=True)
+print(df)
+print('\n')
+df = df.append(pd.DataFrame(w).T, ignore_index=True)
+print(df)

@@ -4,3 +4,7 @@ yahoo_fin
 requests
 requests_html
 luno-python
+pytest-runner
+pytest
+pytest-cov
+requests_mock

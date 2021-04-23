@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def sigmoid(x):
@@ -11,21 +12,19 @@ def sigmoid_derivative(x):
 
 class NeuralNetwork:
 
-    def __init__(self, x, y):
-        self.input      = x
-        self.weights1   = np.random.rand(3, 4)
-        self.weights2   = np.random.rand(4, 1)
-        self.y          = y
-        self.output     = np.zeros(self.y.shape)
+    def __init__(self):
+        self.weights1 = np.random.rand(3, 4)
+        self.weights2 = np.random.rand(4, 1)
 
-    def feedforward(self):
-        self.layer1 = sigmoid(np.dot(self.input, self.weights1))
-        self.output = sigmoid(np.dot(self.layer1, self.weights2))
+    def feedforward(self, input):
+        self.layer1 = sigmoid(np.dot(input, self.weights1))
+        return sigmoid(np.dot(self.layer1, self.weights2))
 
-    def backprop(self):
+    def backprop(self, input, output, y):
         # application of the chain rule to find derivative of the loss function with respect to weights2 and weights1
-        d_weights2 = np.dot(self.layer1.T, (2*(self.y - self.output) * sigmoid_derivative(self.output)))
-        d_weights1 = np.dot(self.input.T,  (np.dot(2*(self.y - self.output) * sigmoid_derivative(self.output), self.weights2.T) * sigmoid_derivative(self.layer1)))
+        d_weights2 = np.dot(self.layer1.T, (2*(y - output) * sigmoid_derivative(output)))
+        d_weights1 = np.dot(input.T,  (np.dot(2*(y - output) * sigmoid_derivative(output),
+                                              self.weights2.T) * sigmoid_derivative(self.layer1)))
 
         # update the weights with the derivative (slope) of the loss function
         self.weights1 += d_weights1
@@ -42,26 +41,27 @@ if __name__ == '__main__':
                   [0],
                   [1]])
 
-    nn = NeuralNetwork(X, y)
+    nn = NeuralNetwork()
 
     print('\ninput')
-    print(nn.input)
+    print(X)
     print('\ny')
-    print(nn.y)
+    print(y)
     print('\nw1')
     print(nn.weights1)
     print('\nw2')
     print(nn.weights2)
-    print('\noutput')
-    print(nn.output)
+    print('\n')
 
     count = 0
+    actions = pd.DataFrame()
     for _ in range(10000):
-        nn.feedforward()
-        nn.backprop()
+        output = nn.feedforward(X)
+        actions = actions.append(pd.DataFrame(output).T, ignore_index=True)
+        nn.backprop(X, output, y)
         count += 1
         print(count)
-        print(nn.output)
+        print(output)
 
     print('\nW1')
     print(nn.weights1)
