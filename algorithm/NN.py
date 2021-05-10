@@ -34,12 +34,13 @@ class NeuralNetwork:
         self.weights2 += d_weights2
 
     def mutate(self):
-        mutation_1 = np.random.rand(self.input_size, self.layer_1_size) / 10 - np.random.rand(self.input_size, self.layer_1_size) / 10
+        mutation_1 = np.random.rand(self.input_size, self.layer_1_size) / 5 - np.random.rand(self.input_size, self.layer_1_size) / 5
         indicator_1 = np.random.randint(0, 2, (self.input_size, self.layer_1_size))
         self.weights1 = indicator_1 * mutation_1 + self.weights1
-        mutation_2 = np.random.rand(self.input_size, self.layer_1_size) / 10 - np.random.rand(self.input_size, self.layer_1_size) / 10
+
+        mutation_2 = np.random.rand(self.layer_1_size, self.output_size) / 5 - np.random.rand(self.layer_1_size, self.output_size) / 5
         indicator_2 = np.random.randint(0, 2, (self.layer_1_size, self.output_size))
-        self.weights1 = indicator_2 * mutation_2 + self.weights2
+        self.weights2 = indicator_2 * mutation_2 + self.weights2
 
 
 if __name__ == '__main__':

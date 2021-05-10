@@ -27,12 +27,14 @@ def main():
         sma_9, sma_26 = prep.get_previous_prices(df)
         type = lp.sma_2(prices, sma_9, sma_26)
         # post order
+        tl.trade_currency_pair(pair, type)
         # write prices to file
         df_2 = prep.append_list_to_df(df, [[price_bid, lp.sma_9, lp.sma_26, type]])
         prep.write_df_to_file(df_2, trade_file, rows=26)
         prep.write_dict_to_file(ticker, api_file)
         print(type, price_bid)
-        time.sleep(3)
+        print(tl.curr)
+        time.sleep(60)
 
 
 if __name__ == '__main__':

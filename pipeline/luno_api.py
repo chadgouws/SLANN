@@ -1,5 +1,7 @@
 import os
 
+import numpy as np
+
 from luno_python.client import Client
 
 
@@ -60,14 +62,14 @@ class TradeLuno:
 
     def _post_buy_order(self, pair, type, account_id):
         try:
-            self.conn.post_market_order(pair=pair, type=type, counter_volume=self.trade_perc * float(self.curr['ZAR']),
+            self.conn.post_market_order(pair=pair, type=type, counter_volume=450.0,
                                         counter_account_id=account_id)
         except Exception as e:
             print(e)
 
     def _post_sell_order(self, pair, type, account_id):
         try:
-            self.conn.post_market_order(pair=pair, type=type, base_volume=self.curr[pair],
+            self.conn.post_market_order(pair=pair, type=type, base_volume=str(float(self.curr[pair]) - 0.000001)[:8],
                                         base_account_id=account_id)
         except Exception as e:
             print(e)
@@ -92,7 +94,8 @@ if __name__ == '__main__':
 
     # tl.trade_currency_pair(pair, type)
 
-    pair = tl.get_ticker(pair)
+    ticker = tl.get_ticker(pair)
     print(pair)
     tl.get_balance()
-    print(tl.curr)
+    print(str(float('0.000533999999') - 0.000001)[:8])
+    #tl.trade_currency_pair(pair, type)

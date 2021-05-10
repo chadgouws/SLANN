@@ -1,5 +1,7 @@
+import os
 import csv
 import time
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -22,9 +24,35 @@ def write_df_to_file(df, csv_file, rows=None):
         df.iloc[:rows].to_csv(csv_file, index=False)
 
 
+def write_nn_to_file(nn, algo):
+    df = pd.DataFrame([[nn.weights1, nn.weights2]])
+    df.to_csv('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' +
+              algo + '_research_' +
+              datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', index=False, header=False)
+
+
 def read_df_from_file(csv_file):
     prices = pd.read_csv(csv_file)
     return prices
+
+
+def read_price_data(research=False):
+    if research:
+        file_path = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/generated/'
+    else:
+        file_path = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/'
+
+    files = os.listdir(file_path)
+    print(files)
+
+
+def move_prices_to_folder(current, to):
+    files = os.listdir(current)
+    print(files)
+    for file in files:
+        df = pd.read_csv(current + file, sep=',')
+        df = df.drop(columns=['Date', 'Open', 'High', 'Low'])
+        df.to_csv(to + file, sep=',', index=False)
 
 
 def append_list_to_df(df, list_of_list):
@@ -55,21 +83,7 @@ def moving_average(prices, period):
 
 
 if __name__ == '__main__':
-    file_name = 'C:/Users/chadg/GARD/Projects/slann/data/test_luno_btc.csv'
+    current_loc = 'C:/Users/chadg/GARD/Data/Crypto/'
+    to_loc = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/'
 
-    for i in range(1, 20):
-        # read
-        df = read_df_from_file(file_name)
-        # get ticker
-        ticker = i
-        prices = df['price'].values
-        prices_new = np.array([ticker])
-        prices = np.append(prices_new, prices)
-        # make trade decision
-        avg_1 = moving_average(prices, 9)
-        avg_2 = moving_average(prices, 26)
-        #write data
-        df_2 = pd.DataFrame([[ticker, avg_1, avg_2]], columns=list(df))
-        df_2 = df_2.append(df, ignore_index=True)
-        write_df_to_file(df_2, file_name)
-        time.sleep(1)
+    move_prices_to_folder(current_loc, to_loc)

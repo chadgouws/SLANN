@@ -8,3 +8,5 @@ pytest-runner
 pytest
 pytest-cov
 requests_mock
+scipy
+matplotlib
