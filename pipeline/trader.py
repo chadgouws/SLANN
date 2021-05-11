@@ -96,28 +96,38 @@ class ResearchPortfolio:
         self.buy = 'BUY'
         self.sell = 'SELL'
         self.none = 'NONE'
-        self.type = self.none
-        self.coin = 0
-        self.cash = 1000
+        self.batch_size = 10
+        self.type = []
+        self.coin = [0] * self.batch_size
+        self.cash = [1000] * self.batch_size
 
     def make_market_order(self, price):
-        if self.type == 'BUY' and self.cash > 0:
-            self.coin = self.cash / price
-            self.cash = 0
-        elif self.type == 'SELL' and self.coin > 0:
-            self.cash = price * self.coin
-            self.coin = 0
-        else:
-            pass
+        for t in range(0, len(self.type)):
+            if self.type[t] == 'BUY' and self.cash[t] > 0:
+                self.coin[t] = self.cash[t] / price[t]
+                self.cash[t] = 0
+            elif self.type[t] == 'SELL' and self.coin[t] > 0:
+                self.cash[t] = price[t] * self.coin[t]
+                self.coin[t] = 0
+            else:
+                pass
 
     def order_type(self, algo_output):
-        if algo_output >= 0.7:
-            self.type = self.buy
-        elif algo_output <= 0.3:
-            self.type = self.sell
-        else:
-            self.type = self.none
+        for a in algo_output:
+            if a > 0.7:
+                self.type.append(self.buy)
+            elif a < 0.3:
+                self.type.append(self.sell)
+            else:
+                self.type.append(self.none)
 
 
 if __name__ == '__main__':
-    a = 1
+    rp = ResearchPortfolio()
+    n = np.random.rand(1, 10)[0]
+    p = np.random.rand(1, 10)[0]
+
+    rp.order_type(n)
+    rp.make_market_order(p)
+    print(rp.cash)
+    print(rp.coin)

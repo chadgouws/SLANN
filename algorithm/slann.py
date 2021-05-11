@@ -51,16 +51,18 @@ class EGeNN:
         else:
             pass
 
-        prep.read_price_data(research=True)
+        df = prep.get_training_data()
+        df_price = df.cumprod() * 1000
         rp = ResearchPortfolio()
-        for d in df.values:
-            output = nn.feedforward(d)
+        for d in df.shape[0]:
+            input = df.loc[d:d+30, :]
+            output = nn.feedforward(input)
             print(nn_choice + ' output: ', output)
-            rp.order_type(output[0])
-            rp.make_market_order(d[0])
+            rp.order_type(output)
+            rp.make_market_order(d)
             print(nn_choice + ' capital: ', rp.cash, rp.coin)
 
-        return rp.cash + rp.coin * d[0]
+        return sum(rp.cash + rp.coin * d)
 
 
 if __name__ == '__main__':

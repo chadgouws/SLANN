@@ -54,12 +54,12 @@ if __name__ == '__main__':
         print(df_perc)
         length = len(df_perc.index)
 
-        for m in range(-1, 2, 1):
-            for s in range(2, 5, 1):
-                df_out = pd.DataFrame(columns=['Unix Timestamp', 'perc_final', 'Symbol'])
+        for m in range(-2, 3, 1):
+            for s in range(1, 4, 1):
+                df_out = pd.DataFrame(columns=['Unix Timestamp', 'Close', 'perc_final', 'Symbol'])
                 print(df_out)
                 for _ in range(0, 10):
-                    mu = m / 30
+                    mu = m / 50
                     sigma = s / 10
                     n = length
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
                     df_perc['perc_add'] = x
                     df_perc['perc_final'] = df_perc['perc'] + df_perc['perc_add']
 
-                    df_adj = df_perc.loc[:, ('Unix Timestamp', 'perc_final')]
+                    df_adj = df_perc.loc[:, ('Unix Timestamp', 'Close', 'perc_final')]
                     df_adj['Symbol'] = [str(mu)[:6] + '~' + str(sigma)] * length
                     print('adj')
                     print(df_adj)
