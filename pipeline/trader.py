@@ -113,6 +113,7 @@ class ResearchPortfolio:
                 pass
 
     def order_type(self, algo_output):
+        self.type = []
         for a in algo_output:
             if a > 0.7:
                 self.type.append(self.buy)

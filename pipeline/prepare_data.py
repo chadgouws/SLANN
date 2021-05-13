@@ -86,9 +86,8 @@ def get_training_data():
     file_dir = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/generated/'
     files = os.listdir(file_dir)
     df_all = pd.DataFrame(list(range(0, 1000)), columns=['row_no'])
-    for i in range(0, 2):
+    for i in range(0, 10):
         file_no = random.randint(0, len(files)-1)
-        print(file_no)
         file_name = files[file_no]
         df = pd.read_csv(file_dir + file_name)
         df['date'] = pd.to_datetime(df['Unix Timestamp'], unit='ms')
@@ -96,11 +95,19 @@ def get_training_data():
         perc = df['perc_final'].tolist()
         start = random.randint(0, len(perc)-1000)
         df_all[str(i)] = perc[start:start+1000]
-    return df_all.drop(labels=['row_no'], axis=1)
+
+    df_all = df_all.drop(labels=['row_no'], axis=1)
+    df_perc = (df_all + 100) / 100
+    df_perc = df_perc.cumprod() * 1000
+    return df_all, df_perc
 
 
 if __name__ == '__main__':
-    current_loc = 'C:/Users/chadg/GARD/Data/Crypto/'
-    to_loc = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/'
+    # current_loc = 'C:/Users/chadg/GARD/Data/Crypto/'
+    # to_loc = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/'
+    #
+    # move_prices_to_folder(current_loc, to_loc)
 
-    move_prices_to_folder(current_loc, to_loc)
+    a, b = get_training_data()
+    print(a)
+    print(b)

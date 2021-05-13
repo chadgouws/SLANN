@@ -13,8 +13,8 @@ def sigmoid_derivative(x):
 class NeuralNetwork:
 
     def __init__(self):
-        self.input_size = 3
-        self.layer_1_size = 4
+        self.input_size = 30
+        self.layer_1_size = 40
         self.output_size = 1
         self.weights1 = np.random.rand(self.input_size, self.layer_1_size) - np.random.rand(self.input_size, self.layer_1_size)
         self.weights2 = np.random.rand(self.layer_1_size, self.output_size) - np.random.rand(self.layer_1_size, self.output_size)
@@ -44,42 +44,51 @@ class NeuralNetwork:
 
 
 if __name__ == '__main__':
-    X = np.array([[1, 1, 1],
-                  [0, 0, 0],
-                  [1, 0, 0],
-                  [1, 0, 1]])
+    X = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                  [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
+                  [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                  [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+                  [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0],
+                  [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
+                  [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0],
+                  [1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+                  [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1]])
     y = np.array([[1],
                   [0],
                   [0],
+                  [1],
+                  [1],
+                  [0],
+                  [0],
+                  [1],
+                  [1],
                   [1]])
 
     nn = NeuralNetwork()
-    print(nn.weights1)
-    nn.mutate()
-    print(nn.weights1)
 
 
-    # print('\ninput')
-    # print(X)
-    # print('\ny')
-    # print(y)
-    # print('\nw1')
-    # print(nn.weights1)
-    # print('\nw2')
-    # print(nn.weights2)
-    # print('\n')
-    #
-    # count = 0
-    # actions = pd.DataFrame()
-    # for _ in range(10000):
-    #     output = nn.feedforward(X)
-    #     actions = actions.append(pd.DataFrame(output).T, ignore_index=True)
-    #     nn.backprop(X, output, y)
-    #     count += 1
-    #     print(count)
-    #     print(output)
-    #
-    # print('\nW1')
-    # print(nn.weights1)
-    # print('\nW2')
-    # print(nn.weights2)
+    print('\ninput')
+    print(X)
+    print('\ny')
+    print(y)
+    print('\nw1')
+    print(nn.weights1)
+    print('\nw2')
+    print(nn.weights2)
+    print('\n')
+
+    count = 0
+    actions = pd.DataFrame()
+    for _ in range(10000):
+        output = nn.feedforward(X)
+        actions = actions.append(pd.DataFrame(output).T, ignore_index=True)
+        nn.backprop(X, output, y)
+        count += 1
+        print(count)
+        print(output)
+
+    print('\nW1')
+    print(nn.weights1)
+    print('\nW2')
+    print(nn.weights2)

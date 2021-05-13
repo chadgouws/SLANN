@@ -2,6 +2,7 @@ import copy
 import datetime
 
 import pandas as pd
+import numpy as np
 
 from algorithm.NN import NeuralNetwork
 from pipeline.trader import ResearchPortfolio
@@ -23,8 +24,9 @@ class EGeNN:
     def best_nn(self, generations):
         for gen in range(1, generations):
             # Simulate each NN for performance comparison
-            self.cash_parent = self._simulate_nn('p')
-            self.cash_child = self._simulate_nn('c')
+            df_perc, df_price = prep.get_training_data()
+            self.cash_parent = self._simulate_nn('p', df_perc, df_price)
+            self.cash_child = self._simulate_nn('c', df_perc, df_price)
             print('p cash: ', self.cash_parent)
             print('c cash: ', self.cash_child)
             # Compare performance and create next generation
@@ -43,7 +45,7 @@ class EGeNN:
         child.mutate()
         return child
 
-    def _simulate_nn(self, nn_choice):
+    def _simulate_nn(self, nn_choice, df_perc, df_price):
         if nn_choice == 'p':
             nn = self.parent
         elif nn_choice == 'c':
@@ -51,26 +53,22 @@ class EGeNN:
         else:
             pass
 
-        df = prep.get_training_data()
-        df_price = df.cumprod() * 1000
         rp = ResearchPortfolio()
-        for d in df.shape[0]:
-            input = df.loc[d:d+30, :]
+        for start in range(0, df_perc.shape[0]):
+            end = start + 29
+            input = df_perc.loc[start:end, :].values.T
             output = nn.feedforward(input)
             print(nn_choice + ' output: ', output)
             rp.order_type(output)
-            rp.make_market_order(d)
+            rp.make_market_order(df_price.loc[end, :])
             print(nn_choice + ' capital: ', rp.cash, rp.coin)
 
-        return sum(rp.cash + rp.coin * d)
+        return sum(np.array(rp.cash) + np.array(rp.coin) * df_price.loc[999, :].values.T)
 
 
 if __name__ == '__main__':
-    df = pd.DataFrame([[1, 0.8, 0.7],
-                       [2, 1.7, 1.5],
-                       [3, 2.5, 2.4],
-                       [2, 2.2, 2.5],
-                       [3, 2.9, 2.8]])
-
     egenn = EGeNN()
-    egenn.best_nn(2)
+    #egenn.best_nn(5)
+    df_perc, df_price = prep.get_training_data()
+    egenn.cash_parent = egenn._simulate_nn('p', df_perc, df_price)
+    egenn.cash_child = egenn._simulate_nn('c', df_perc, df_price)
