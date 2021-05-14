@@ -23,12 +23,13 @@ class EGeNN:
 
     def best_nn(self, generations):
         for gen in range(1, generations):
+            print('Generation: ', gen)
             # Simulate each NN for performance comparison
             df_perc, df_price = prep.get_training_data()
             self.cash_parent = self._simulate_nn('p', df_perc, df_price)
             self.cash_child = self._simulate_nn('c', df_perc, df_price)
-            print('p cash: ', self.cash_parent)
-            print('c cash: ', self.cash_child)
+            print('Parent: ', self.cash_parent)
+            print('Child: ', self.cash_child)
             # Compare performance and create next generation
             if self.cash_child >= self.cash_parent:
                 self.parent = self.child
@@ -54,21 +55,16 @@ class EGeNN:
             pass
 
         rp = ResearchPortfolio()
-        for start in range(0, df_perc.shape[0]):
+        for start in range(0, df_perc.shape[0]-29):
             end = start + 29
             input = df_perc.loc[start:end, :].values.T
             output = nn.feedforward(input)
-            print(nn_choice + ' output: ', output)
             rp.order_type(output)
             rp.make_market_order(df_price.loc[end, :])
-            print(nn_choice + ' capital: ', rp.cash, rp.coin)
 
         return sum(np.array(rp.cash) + np.array(rp.coin) * df_price.loc[999, :].values.T)
 
 
 if __name__ == '__main__':
     egenn = EGeNN()
-    #egenn.best_nn(5)
-    df_perc, df_price = prep.get_training_data()
-    egenn.cash_parent = egenn._simulate_nn('p', df_perc, df_price)
-    egenn.cash_child = egenn._simulate_nn('c', df_perc, df_price)
+    egenn.best_nn(1000)
