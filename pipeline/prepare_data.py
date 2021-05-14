@@ -25,10 +25,10 @@ def write_df_to_file(df, csv_file, rows=None):
 
 
 def write_nn_to_file(nn, algo):
-    df = pd.DataFrame([[nn.weights1, nn.weights2]])
-    df.to_csv('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' +
-              algo + '_research_' +
-              datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', index=False, header=False)
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W1_' +
+               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', nn.weights1, delimiter=",")
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W2_' +
+               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', nn.weights2, delimiter=",")
 
 
 def read_df_from_file(csv_file):

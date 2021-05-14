@@ -67,4 +67,4 @@ class EGeNN:
 
 if __name__ == '__main__':
     egenn = EGeNN()
-    egenn.best_nn(1000)
+    egenn.best_nn(10)
