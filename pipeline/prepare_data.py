@@ -24,11 +24,17 @@ def write_df_to_file(df, csv_file, rows=None):
         df.iloc[:rows].to_csv(csv_file, index=False)
 
 
-def write_nn_to_file(nn, algo):
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W1_' +
+def write_nn_to_file(nn, algo, gen=0):
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_' + str(gen) + '_research_W1_' +
                datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', nn.weights1, delimiter=",")
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W2_' +
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_' + str(gen) + '_research_W2_' +
                datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', nn.weights2, delimiter=",")
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_' + str(gen) + '_research_W3_' +
+               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', nn.weights3, delimiter=",")
+
+
+def read_nn_from_file(file_path):
+    return np.genfromtxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + file_path, delimiter=',')
 
 
 def read_df_from_file(csv_file):
@@ -82,19 +88,19 @@ def moving_average(prices, period):
     return avg
 
 
-def get_training_data():
+def get_training_data(periods=1000, samples=10):
     file_dir = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/generated/'
     files = os.listdir(file_dir)
-    df_all = pd.DataFrame(list(range(0, 1000)), columns=['row_no'])
-    for i in range(0, 10):
+    df_all = pd.DataFrame(list(range(0, periods)), columns=['row_no'])
+    for i in range(0, samples):
         file_no = random.randint(0, len(files)-1)
         file_name = files[file_no]
         df = pd.read_csv(file_dir + file_name)
         df['date'] = pd.to_datetime(df['Unix Timestamp'], unit='ms')
         df = df[df.date < datetime.datetime(2019, 7, 1, 0, 0, 0)]
         perc = df['perc_final'].tolist()
-        start = random.randint(0, len(perc)-1000)
-        df_all[str(i)] = perc[start:start+1000]
+        start = random.randint(0, len(perc)-periods)
+        df_all[str(i)] = perc[start:start+periods]
 
     df_all = df_all.drop(labels=['row_no'], axis=1)
     df_perc = (df_all + 100) / 100
@@ -103,11 +109,6 @@ def get_training_data():
 
 
 if __name__ == '__main__':
-    # current_loc = 'C:/Users/chadg/GARD/Data/Crypto/'
-    # to_loc = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/'
-    #
-    # move_prices_to_folder(current_loc, to_loc)
-
-    a, b = get_training_data()
-    print(a)
-    print(b)
+    a = read_nn_from_file('SMGANN_1000_research_W3_2021-05-17T13-14-41.csv')
+    df = pd.DataFrame(a)
+    print(df)

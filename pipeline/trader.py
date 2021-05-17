@@ -96,7 +96,7 @@ class ResearchPortfolio:
         self.buy = 'BUY'
         self.sell = 'SELL'
         self.none = 'NONE'
-        self.batch_size = 10
+        self.batch_size = 30
         self.type = []
         self.coin = [0] * self.batch_size
         self.cash = [1000] * self.batch_size
