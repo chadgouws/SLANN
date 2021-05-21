@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 from pipeline.prepare_data import moving_average
 

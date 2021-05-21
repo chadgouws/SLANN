@@ -4,15 +4,16 @@ from pipeline import prepare_data as prep
 from pipeline.trader import LunoPortfolio
 from pipeline.luno_api import TradeLuno
 
-
-lp = LunoPortfolio()
-tl = TradeLuno()
-trade_file = 'C:/Users/chadg/GARD/Projects/slann/data/test_luno_btc.csv'
-api_file = 'C:/Users/chadg/GARD/Projects/slann/data/test_luno.csv'
-pair = 'XBTZAR'
+from algorithm.NN import NeuralNetwork
 
 
 def main_algo():
+    lp = LunoPortfolio()
+    tl = TradeLuno()
+    trade_file = 'C:/Users/chadg/GARD/Projects/slann/data/test_luno_btc.csv'
+    api_file = 'C:/Users/chadg/GARD/Projects/slann/data/test_luno.csv'
+    pair = 'XBTZAR'
+
     while True:
         # get data
         df = prep.read_df_from_file(trade_file)
@@ -38,15 +39,32 @@ def main_algo():
 
 
 def main_nn():
-    # Read price data from file
-    # Read NN info from file
+    # Intialize classes
+    tl = TradeLuno()
+    nn = NeuralNetwork()
+
+    currency_pairs = ['XBTZAR', 'ETHZAR']
     # Get account balance
-    # Get ticker price
-    # Check if API failed
-    # Prepare data
-    # NN output
-    # Post order
-    # Write process to file
+    tl.get_balance()
+
+    for pair in currency_pairs:
+        # Read price data from file
+        # Read NN info from file
+
+        # Get ticker price
+        ticker = tl.get_ticker(pair)
+        price_bid = prep.get_bid_price(ticker)
+        # Check if API failed
+        if price_bid == -1.0:
+            print('API FAILED')
+            continue               # Consider retrying   [ ticker = tl.get_ticker(pair) ]
+        # Prepare data
+        # NN output
+        output = nn.feedforward(input)
+        # Order type
+        # Post order
+        tl.trade_currency_pair(pair, type)
+        # Write process to file
 
 
 if __name__ == '__main__':
