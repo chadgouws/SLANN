@@ -23,7 +23,7 @@ class EGeNN:
 
     def best_nn(self, generations):
         for gen in range(1, generations+1):
-            print('Generation: ', gen)
+            print('\nGeneration: ', gen)
             # Simulate each NN for performance comparison
             df_perc, df_price = prep.get_training_data(periods=1000, samples=30)
             self.cash_parent = self._simulate_nn('p', df_perc, df_price)
@@ -66,7 +66,7 @@ class EGeNN:
 
 
 if __name__ == '__main__':
-    generations = 2000
+    generations = 1000
     egenn = EGeNN()
 
     egenn.best_nn(generations)

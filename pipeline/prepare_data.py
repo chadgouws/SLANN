@@ -109,6 +109,6 @@ def get_training_data(periods=1000, samples=10):
 
 
 if __name__ == '__main__':
-    a = read_nn_from_file('SMGANN_1000_research_W3_2021-05-17T13-14-41.csv')
+    a = read_nn_from_file()
     df = pd.DataFrame(a)
     print(df)

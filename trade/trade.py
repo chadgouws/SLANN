@@ -12,7 +12,7 @@ api_file = 'C:/Users/chadg/GARD/Projects/slann/data/test_luno.csv'
 pair = 'XBTZAR'
 
 
-def main():
+def main_algo():
     while True:
         # get data
         df = prep.read_df_from_file(trade_file)
@@ -37,5 +37,17 @@ def main():
         time.sleep(60)
 
 
+def main_nn():
+    # Read price data from file
+    # Read NN info from file
+    # Get account balance
+    # Get ticker price
+    # Check if API failed
+    # Prepare data
+    # NN output
+    # Post order
+    # Write process to file
+
+
 if __name__ == '__main__':
-    main()
+    main_algo()

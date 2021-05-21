@@ -97,5 +97,4 @@ if __name__ == '__main__':
     ticker = tl.get_ticker(pair)
     print(pair)
     tl.get_balance()
-    print(str(float('0.000533999999') - 0.000001)[:8])
     #tl.trade_currency_pair(pair, type)
