@@ -27,7 +27,7 @@ class TradeLuno:
         self.price_files = {'XBTZAR': 'C:/Users/chadg/GARD/Projects/slann/data/prod_prices/XBTZAR.csv',
                             'ETHZAR': 'C:/Users/chadg/GARD/Projects/slann/data/prod_prices/ETHZAR.csv',
                             }
-        self.trade_perc = 0.3
+        self.trade_perc = 0.35
         self.set_key_id()
         self.set_secret_key()
         self.set_connection()
