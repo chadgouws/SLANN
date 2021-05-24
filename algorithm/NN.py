@@ -61,17 +61,17 @@ class NeuralNetwork:
             if init:
                 w = np.random.rand(self.input_size, self.layer_1_size) - np.random.rand(self.input_size, self.layer_1_size)
             else:
-                w = prep.read_nn_from_file('SMGANN_3000_research_W1_2021-05-20T16-23-29.csv')
+                w = prep.read_nn_from_file('SMGANN_1000_research_W1_2021-05-21T10-48-09.csv')
         elif weight == 2:
             if init:
                 w = np.random.rand(self.layer_1_size, self.layer_2_size) - np.random.rand(self.layer_1_size, self.layer_2_size)
             else:
-                w = prep.read_nn_from_file('SMGANN_3000_research_W2_2021-05-20T16-23-29.csv')
+                w = prep.read_nn_from_file('SMGANN_1000_research_W2_2021-05-21T10-48-09.csv')
         elif weight == 3:
             if init:
                 w = np.random.rand(self.layer_2_size, self.output_size) - np.random.rand(self.layer_2_size, self.output_size)
             else:
-                w = prep.read_nn_from_file('SMGANN_3000_research_W3_2021-05-20T16-23-29.csv')
+                w = prep.read_nn_from_file('SMGANN_1000_research_W3_2021-05-21T10-48-09.csv')
                 w = w.reshape((25, 1))
         else:
             pass

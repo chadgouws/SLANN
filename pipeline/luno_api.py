@@ -7,6 +7,9 @@ class TradeLuno:
         self.key_id = ''
         self.secret_key = ''
         self.conn = ''
+        self.current_price = {'XBTZAR': 0,
+                              'ETHZAR': 0,
+                              }
         self.buy = 'BUY'
         self.sell = 'SELL'
         self.none = 'NONE'
@@ -24,7 +27,7 @@ class TradeLuno:
         self.price_files = {'XBTZAR': 'C:/Users/chadg/GARD/Projects/slann/data/prod_prices/XBTZAR.csv',
                             'ETHZAR': 'C:/Users/chadg/GARD/Projects/slann/data/prod_prices/ETHZAR.csv',
                             }
-        self.trade_perc = 0.9
+        self.trade_perc = 0.4
         self.set_key_id()
         self.set_secret_key()
         self.set_connection()
@@ -64,9 +67,10 @@ class TradeLuno:
         self.curr['ETHZAR'] = balance['balance'][1]['balance']
 
     def _post_buy_order(self, pair, type, account_id):
+        amount = round(self.trade_perc * float(self.curr['ZAR']))
         try:
             self.conn.post_market_order(pair=pair, type=type,
-                                        counter_volume=round(self.trade_perc * float(self.curr['ZAR'])),
+                                        counter_volume=amount,
                                         counter_account_id=account_id)
         except Exception as e:
             print(e)
@@ -86,8 +90,11 @@ class TradeLuno:
         else:
             self.type = self.none
 
+        self.type = self.buy
+
     def trade_currency_pair(self, pair):
-        if self.type == 'BUY':
+        btc_zar_funds = float(self.curr['ZAR']) / self.current_price[pair]
+        if self.type == 'BUY' and btc_zar_funds > 0.00052:
             self._post_buy_order(pair, self.type, self.account_id[pair])
         elif self.type == 'SELL':
             self._post_sell_order(pair, self.type, self.account_id['ZAR'])

@@ -25,12 +25,15 @@ def write_df_to_file(df, csv_file, rows=None):
 
 
 def write_nn_to_file(nn, algo, gen=0):
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_' + str(gen) + '_research_W1_' +
-               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', nn.weights1, delimiter=",")
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_' + str(gen) + '_research_W2_' +
-               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', nn.weights2, delimiter=",")
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_' + str(gen) + '_research_W3_' +
-               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', nn.weights3, delimiter=",")
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W1_' +
+               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '_' + str(gen) + '.csv',
+               nn.weights1, delimiter=",")
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W2_' +
+               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '_' + str(gen) + '.csv',
+               nn.weights2, delimiter=",")
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W3_' +
+               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '_' + str(gen) + '.csv',
+               nn.weights3, delimiter=",")
 
 
 def read_nn_from_file(file_path):
