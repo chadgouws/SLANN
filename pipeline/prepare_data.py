@@ -9,7 +9,7 @@ import pandas as pd
 
 def write_dict_to_file(data_dict, csv_file):
     with open(csv_file, mode='a', newline='') as f:
-        fieldnames = ['pair', 'timestamp', 'bid', 'ask', 'last_trade', 'rolling_24_hour_volume', 'status']
+        fieldnames = ['pair', 'timestamp', 'bid', 'ask', 'last_trade', 'rolling_24_hour_volume', 'status', 'type']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         #writer.writeheader()
         writer.writerow(data_dict)
@@ -106,6 +106,13 @@ def get_training_data(periods=1000, samples=10):
     df_perc = (df_all + 100) / 100
     df_perc = df_perc.cumprod() * 1000
     return df_all, df_perc
+
+
+def calculate_perc_change(df):
+    df_price = df['price']
+    df['perc'] = 100 * (df_price / df_price.shift(-1) - 1)
+    df = df.dropna()
+    return df['perc']
 
 
 if __name__ == '__main__':
