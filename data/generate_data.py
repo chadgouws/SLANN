@@ -37,13 +37,16 @@ def read_csv(file):
 def calculate_perc_change(df, exchange='gemini'):
     if exchange == 'gemini':
         df = df.loc[:, ('Unix Timestamp', 'Close')]
+        df = df.sort_values(by=['Unix Timestamp'])
         df_close = df['Close']
-        df['perc'] = 100 * (df_close / df_close.shift(-1) - 1)
+        df['perc'] = 100 * (df_close / df_close.shift(1) - 1)
+        print(df)
         df = df.dropna()
     elif exchange == 'binance':
         df = df.loc[:, ('unix', 'close')]
+        df = df.sort_values(by=['unix'])
         df_close = df['close']
-        df['perc'] = 100 * (df_close / df_close.shift(-1) - 1)
+        df['perc'] = 100 * (df_close / df_close.shift(1) - 1)
         df = df.dropna()
     else:
         pass
@@ -55,44 +58,44 @@ def describe_data(df):
 
 
 if __name__ == '__main__':
-    # files = os.listdir('C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/')
-    # print(files)
-    # files_1 = ['gemini_BTCUSD_1hr.csv', 'gemini_ETHUSD_1hr.csv', 'gemini_LTCUSD_1hr.csv', 'gemini_ZECUSD_1hr.csv']
-    #
-    # for file_name in files_1:
-    #     df = read_csv(file_name)
-    #     df_perc = calculate_perc_change(df, exchange='gemini')
-    #     print(df_perc)
-    #     length = len(df_perc.index)
-    #
-    #     for m in range(-2, 3, 1):
-    #         for s in range(1, 4, 1):
-    #             df_out = pd.DataFrame(columns=['Unix Timestamp', 'Close', 'perc_final', 'Symbol'])
-    #             print(df_out)
-    #             for _ in range(0, 10):
-    #                 mu = m / 50
-    #                 sigma = s / 10
-    #                 n = length
-    #
-    #                 x = np.random.normal(mu, sigma, n)
-    #                 df_perc['perc_add'] = x
-    #                 df_perc['perc_final'] = df_perc['perc'] + df_perc['perc_add']
-    #
-    #                 df_adj = df_perc.loc[:, ('Unix Timestamp', 'Close', 'perc_final')]
-    #                 df_adj['Symbol'] = [str(mu)[:6] + '~' + str(sigma)] * length
-    #                 print('adj')
-    #                 print(df_adj)
-    #                 df_out = df_out.append(df_adj, ignore_index=True)
-    #                 print('out')
-    #                 print(df_out)
-    #
-    #             df_out.to_csv('C:/Users/chadg/GARD/Projects/slann/data/price_ticker/generated/' +
-    #                           file_name.split('.')[0] + '_' +
-    #                           datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', sep=',', index=False)
-    #             time.sleep(2.5)
+
+    files_1 = ['gemini_BTCUSD_1hr.csv', 'gemini_ETHUSD_1hr.csv', 'gemini_LTCUSD_1hr.csv', 'gemini_ZECUSD_1hr.csv',
+               'gemini_ETHBTC_1hr.csv']
+
+    for file_name in files_1:
+        df = read_csv(file_name)
+        df_perc = calculate_perc_change(df, exchange='gemini')
+        print(df_perc)
+        length = len(df_perc.index)
+
+        for m in range(-2, 3, 1):
+            for s in range(1, 4, 1):
+                df_out = pd.DataFrame(columns=['Unix Timestamp', 'Close', 'perc_final', 'Symbol'])
+                print(df_out)
+                for _ in range(0, 10):
+                    mu = m / 50
+                    sigma = s / 10
+                    n = length
+
+                    x = np.random.normal(mu, sigma, n)
+                    df_perc['perc_add'] = x
+                    df_perc['perc_final'] = df_perc['perc'] + df_perc['perc_add']
+
+                    df_adj = df_perc.loc[:, ('Unix Timestamp', 'Close', 'perc_final')]
+                    df_adj['Symbol'] = [str(mu)[:6] + '~' + str(sigma)] * length
+                    print('adj')
+                    print(df_adj)
+                    df_out = df_out.append(df_adj, ignore_index=True)
+                    print('out')
+                    print(df_out)
+
+                df_out.to_csv('C:/Users/chadg/GARD/Projects/slann/data/price_ticker/generated/' +
+                              file_name.split('.')[0] + '_' +
+                              datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '.csv', sep=',', index=False)
+                time.sleep(2.5)
 
     files_2 = ['Binance_ADAUSDT_1h.csv', 'Binance_BNBUSDT_1h.csv', 'Binance_ETCUSDT_1h.csv', 'Binance_LINKUSDT_1h.csv',
-               'Binance_NEOUSDT_1h.csv', 'Binance_XLMUSDT_1h.csv', 'Binance_XRPUSDT_1h.csv']
+               'Binance_MATICUSDT_1h.csv', 'Binance_NEOUSDT_1h.csv', 'Binance_XLMUSDT_1h.csv', 'Binance_XRPUSDT_1h.csv']
 
     for file_name in files_2:
         df = read_csv(file_name)

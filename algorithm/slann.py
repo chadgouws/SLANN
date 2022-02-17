@@ -25,7 +25,7 @@ class EGeNN:
         for gen in range(1, generations+1):
             print('\nGeneration: ', gen)
             # Simulate each NN for performance comparison
-            df_perc, df_price = prep.get_training_data(periods=1000, samples=30)
+            df_perc, df_price = prep.get_training_data(periods=1000, samples=1)
             self.cash_parent = self._simulate_nn('p', df_perc, df_price)
             self.cash_child = self._simulate_nn('c', df_perc, df_price)
             print('Parent: ', self.cash_parent)
@@ -54,11 +54,14 @@ class EGeNN:
         else:
             pass
 
-        rp = ResearchPortfolio()
+        print(df_perc)
+        rp = ResearchPortfolio(30)
         for start in range(0, df_perc.shape[0]-29):
             end = start + 29
             input = df_perc.loc[start:end, :].values.T
+            print(input)
             output = nn.feedforward(input)
+            print('output', output)
             rp.order_type(output)
             rp.make_market_order(df_price.loc[end, :])
 
@@ -66,7 +69,7 @@ class EGeNN:
 
 
 if __name__ == '__main__':
-    generations = 1000
+    generations = 1
     egenn = EGeNN()
 
     egenn.best_nn(generations)

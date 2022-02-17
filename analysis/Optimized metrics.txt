@@ -1,0 +1,78 @@
+GRID SEARCH ON 1 HOUR CANDLES
+Search areas: [ROI, PERIOD]
+
+AROON:
+[350:450, 250:350]
+[750:850, 1000:1050]
+
+BOLLINGER BANDS:
+*df['return'] = df['return'].abs()*
+*df['ratio'] = df['ma'] / df['bold'] - 1*
+[15:20, 5:10]
+[200:225, 5:10]
+
+MA:
+Ratio
+[1100:1200, 950:1050]
+[350:450, 300:400]
+
+Closing Price Indicator
+*df['price_ind'] = np.where(df['Close'] > df['ma'], 1, 0)*
+[1450:1500, 1450:1500]
+[850:950, 370:420]
+[850:950, 750:800]
+
+MACD:
+signal_period = int(2.16 * period)
+*np.where(macd > signal, 1, 0)*
+[400:900, 100:450]
+[900:1000, 950:1000]
+
+*convergent divergent*
+[900:1000, 900:1000]
+
+*np.where((df['macd'] >= df['signal']) & (df['signal'] < 0), 1, 0)*
+[900:1000, 900:1000]
+
+
+ADX:
+[600:1000, 180:200]
+
+
+
+RSI:
+[900:1000, 900:1000]
+[250:300, 350:450]
+
+RSI Gradient
+[400:430, 120:150]
+
+
+STOCHASTIC:
+K
+[700:800, 350:500]
+[950:1000, 950:1000]
+
+D
+[700:800, 400:600]
+[950:1000, 950:1000]
+
+Indicator
+[400:500, 350:420]
+[500:600, 500:600]
+[700:800, 500:600]
+[700:800, 950:1000]
+
+
+MAX % CHANGE IN PERIOD
+[0:1000, 900:1000]
+
+MIN % CHANGE IN PERIOD
+[0:1000, 900:1000]
+
+
+VOLUME
+*df['sma'] = ict.sma(df['Volume'], period=p)*
+*df['ratio'] = df['Volume'] / df['sma']*
+
+[800:1000, 0:30]

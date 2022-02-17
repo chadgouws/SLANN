@@ -10,3 +10,4 @@ pytest-cov
 requests_mock
 scipy
 matplotlib
+python-dotenv

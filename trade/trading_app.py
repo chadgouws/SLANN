@@ -7,20 +7,19 @@ from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
 
+from pipeline import prepare_data as prep
+
 
 load_dotenv()
 
 
-def read_nn_from_file(file_path, prod=True):
-    if prod:
-        return np.genfromtxt('repositories/kauta_web_app/data/nn_architecture/' + file_path, delimiter=',')
-    else:
-        return np.genfromtxt('C:/Users/chadg/GARD/Projects/kauta_web_app/data/nn_architecture/' + file_path, delimiter=',')
+def read_nn_from_file(file_path):
+    return np.genfromtxt('C:/Users/chadg/GARD/Projects/slann/' + file_path, delimiter=',')
 
 
 def append_list_to_df(df, list_of_list):
     df_2 = pd.DataFrame(list_of_list, columns=list(df))
-    return df.append(df_2, ignore_index=True)
+    return df_2.append(df, ignore_index=True)
 
 
 def append_current_price_to_previous(price, df):
@@ -33,7 +32,7 @@ def get_bid_price(ticker):
 
 def calculate_perc_change(df):
     df_price = df['price']
-    df['perc'] = 100 * (df_price / df_price.shift(1) - 1)
+    df['perc'] = 100 * (df_price / df_price.shift(-1) - 1)
     df = df.dropna()
     return df['perc']
 
@@ -52,7 +51,7 @@ def write_df_to_file(df, csv_file, rows=None):
     elif len(df.index) < rows:
         df.iloc[:len(df.index)].to_csv(csv_file, index=False)
     else:
-        df.iloc[1:].to_csv(csv_file, index=False)
+        df.iloc[:rows].to_csv(csv_file, index=False)
 
 
 class TradeLuno:
@@ -79,10 +78,8 @@ class TradeLuno:
                      'ETHZAR': '0',
                      }
         self.price_files = {'XBTZAR': 'C:/Users/chadg/GARD/Projects/slann/data/prod_prices/XBTZAR.csv',
-                            'ETHZAR': 'repositories/kauta_web_app/data/prod_prices/ETHZAR.csv',
+                            'ETHZAR': 'C:/Users/chadg/GARD/Projects/slann/data/prod_prices/ETHZAR.csv',
                             }
-                            # C:/Users/chadg/GARD/Projects/slann/data/prod_prices/XBTZAR.csv
-                            # C:/Users/chadg/GARD/Projects/slann/data/prod_prices/ETHZAR.csv
         self.trade_perc = 0.35
         self.set_key_id()
         self.set_secret_key()
@@ -152,8 +149,11 @@ class TradeLuno:
         else:
             self.type = self.none
 
+        self.type = self.sell
+
     def trade_currency_pair(self, pair):
-        if self.type == 'BUY':
+        btc_zar_funds = float(self.curr['ZAR']) / self.current_price[pair]
+        if self.type == 'BUY' and btc_zar_funds > 0.00054:
             self._post_buy_order(pair, self.type, self.account_id[pair])
         elif self.type == 'SELL':
             self._post_sell_order(pair, self.type, self.account_id['ZAR'])
@@ -221,17 +221,17 @@ class NeuralNetwork:
             if init:
                 w = np.random.rand(self.input_size, self.layer_1_size) - np.random.rand(self.input_size, self.layer_1_size)
             else:
-                w = read_nn_from_file('SMGANN_research_W1_2021-08-11T14-45-26_4000.csv', prod=False)
+                w = read_nn_from_file('data/nn_architecture/SMGANN_1000_research_W1_2021-05-21T10-48-09.csv')
         elif weight == 2:
             if init:
                 w = np.random.rand(self.layer_1_size, self.layer_2_size) - np.random.rand(self.layer_1_size, self.layer_2_size)
             else:
-                w = read_nn_from_file('SMGANN_research_W2_2021-08-11T14-45-26_4000.csv', prod=False)
+                w = read_nn_from_file('data/nn_architecture/SMGANN_1000_research_W2_2021-05-21T10-48-09.csv')
         elif weight == 3:
             if init:
                 w = np.random.rand(self.layer_2_size, self.output_size) - np.random.rand(self.layer_2_size, self.output_size)
             else:
-                w = read_nn_from_file('SMGANN_research_W3_2021-08-11T14-45-26_4000.csv', prod=False)
+                w = read_nn_from_file('data/nn_architecture/SMGANN_1000_research_W3_2021-05-21T10-48-09.csv')
                 w = w.reshape((25, 1))
         else:
             pass
@@ -239,45 +239,42 @@ class NeuralNetwork:
         return w
 
 
-api_file = 'C:/Users/chadg/GARD/Projects/slann/data/test_luno.csv'       # 'repositories/kauta_web_app/data/test_luno.csv'
+api_file = 'C:/Users/chadg/GARD/Projects/slann/data/SMGANN/test_luno.csv'          # 'repositories/kauta_web_app/data/test_luno.csv'
 
 
 def main_nn(currency_pairs):
     tl = TradeLuno()
     nn = NeuralNetwork()                                                        # Initialize Neural Net
 
-    tl.get_balance()                                                            # Get account balance from API
-    prices = [4.0, 5.0, 5.0, 6.0, 5.0, 6.0, 7.0, 8.0, 8.0, 8.0, 7.0, 6.0, 7.0, 6.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 4.0, 5.0, 48980.0, 48857.0, 48980.0]
-    for price in prices:
-        for pair in currency_pairs:
-            df = pd.read_csv(tl.price_files[pair], header=0)                        # Read price data from file
-            # Get ticker data from API
+    #tl.get_balance()                                                            # Get account balance from API
+    df = prep.get_calc_data()
+    df = df[['Symbol', 'Close', 'date']]
+    df_price = df['Close']
+    df['perc'] = 100 * (df_price / df_price.shift(-1) - 1)
+    df = df.dropna()
+    print(df)
+    for pair in currency_pairs:
+        # df = pd.read_csv(tl.price_files[pair], header=0)                        # Read price data from file
+        # Get ticker data from API
+        # ticker = tl.get_ticker(pair)
+        tl.current_price[pair] = get_bid_price(ticker)
+        # Check if API failed - if it fails, pause process for 60s then call API again
+        if tl.current_price == -1.0:
+            time.sleep(60)
             ticker = tl.get_ticker(pair)
-            print(ticker)
-            tl.current_price[pair] = price     # get_bid_price(ticker)
-            # Check if API failed - if it fails, pause process for 60s then call API again
-            if tl.current_price == -1.0:
-                time.sleep(60)
-                ticker = tl.get_ticker(pair)
-                price_bid = get_bid_price(ticker)
-                if price_bid == -1.0:
-                    continue
-            df_prices = append_list_to_df(df, [[tl.current_price[pair]]])      # Append current price to previous
-            print(df_prices)
-            df_perc = calculate_perc_change(df_prices)                         # Prepare data into perc
-            print(df_perc)
-            print(df_perc.values.reshape(1, 30))
-            print(df_perc.values.T)
-            output = nn.feedforward(df_perc.values.reshape(1, 30))                  # NN makes market prediction: 0-1
-            print(output)
-            tl.order_type(output[0][0])                                             # Order type BUY/SELL
-            print(tl.type)
-            tl.trade_currency_pair(pair)                                            # Post SELL/BUY order to API
-            # Write process to file
-            df_2 = append_list_to_df(df, [[tl.current_price[pair]]])
-            write_df_to_file(df_2, tl.price_files[pair], rows=30)
-            ticker['type'] = tl.type
-            write_dict_to_file(ticker, api_file)
+            price_bid = get_bid_price(ticker)
+            if price_bid == -1.0:
+                continue
+        df_prices = append_list_to_df(df, [[tl.current_price[pair]]])      # Append current price to previous
+        df_perc = calculate_perc_change(df_prices)                         # Prepare data into perc
+        output = nn.feedforward(df_perc.values.reshape(1, 30))                  # NN makes market prediction: 0-1
+        tl.order_type(output[0][0])                                             # Order type BUY/SELL
+        # tl.trade_currency_pair(pair)                                            # Post SELL/BUY order to API
+        # Write process to file
+        df_2 = append_list_to_df(df, [[tl.current_price[pair]]])
+        write_df_to_file(df_2, tl.price_files[pair], rows=30)
+        ticker['type'] = tl.type
+        write_dict_to_file(ticker, api_file)
 
 
 if __name__ == '__main__':

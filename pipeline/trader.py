@@ -91,11 +91,11 @@ class LunoPortfolio:
 
 class ResearchPortfolio:
 
-    def __init__(self):
+    def __init__(self, batch_size):
         self.buy = 'BUY'
         self.sell = 'SELL'
         self.none = 'NONE'
-        self.batch_size = 30
+        self.batch_size = batch_size
         self.type = []
         self.coin = [0] * self.batch_size
         self.cash = [1000] * self.batch_size
@@ -111,10 +111,12 @@ class ResearchPortfolio:
             else:
                 pass
 
-    def order_type(self, algo_output):
+    def order_type(self, algo_output, perc_change):
         self.type = []
         for a in algo_output:
-            if a > 0.7:
+            if perc_change < 0.99:
+                self.type.append(self.sell)
+            elif a > 0.7:
                 self.type.append(self.buy)
             elif a < 0.3:
                 self.type.append(self.sell)

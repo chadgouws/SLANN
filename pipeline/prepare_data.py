@@ -91,7 +91,7 @@ def moving_average(prices, period):
     return avg
 
 
-def get_training_data(periods=1000, samples=10):
+def get_training_data(periods=1000, samples=30):
     file_dir = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/generated/'
     files = os.listdir(file_dir)
     df_all = pd.DataFrame(list(range(0, periods)), columns=['row_no'])
@@ -99,8 +99,8 @@ def get_training_data(periods=1000, samples=10):
         file_no = random.randint(0, len(files)-1)
         file_name = files[file_no]
         df = pd.read_csv(file_dir + file_name)
-        df['date'] = pd.to_datetime(df['Unix Timestamp'], unit='ms')
-        df = df[df.date < datetime.datetime(2019, 7, 1, 0, 0, 0)]
+        # df['date'] = pd.to_datetime(df['Unix Timestamp'], unit='ms')
+        # df = df[df.date < datetime.datetime(2019, 7, 1, 0, 0, 0)]
         perc = df['perc_final'].tolist()
         start = random.randint(0, len(perc)-periods)
         df_all[str(i)] = perc[start:start+periods]
@@ -109,6 +109,16 @@ def get_training_data(periods=1000, samples=10):
     df_perc = (df_all + 100) / 100
     df_perc = df_perc.cumprod() * 1000
     return df_all, df_perc
+
+
+def get_calc_data():
+    file_dir = 'C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/'
+    file_name = 'gemini_BTCUSD_1hr.csv'
+    df = pd.read_csv(file_dir + file_name)
+    print(df)
+    df['date'] = pd.to_datetime(df['Date'])
+    df = df[df['date'] >= datetime.datetime(2017, 1, 1, 0, 0, 0)]
+    return df
 
 
 def calculate_perc_change(df):
