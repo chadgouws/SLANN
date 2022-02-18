@@ -1,6 +1,6 @@
 import unittest
 
-from portfolio.portfolio import Portfolio, PortfolioTimeline
+from portfolio.portfolio import Portfolio
 from portfolio.tests import data
 from portfolio.tests import functions as func
 

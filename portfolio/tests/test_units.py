@@ -1,6 +1,6 @@
 import unittest
 
-from portfolio.portfolio import Portfolio, PortfolioTimeline
+from portfolio.portfolio import Portfolio
 
 
 class TestPortfolioUnits(unittest.TestCase):

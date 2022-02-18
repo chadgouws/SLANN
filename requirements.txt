@@ -11,3 +11,4 @@ requests_mock
 scipy
 matplotlib
 python-dotenv
+pandas_ta

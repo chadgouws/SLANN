@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
 
+import pandas_ta as ta
+
 from indicators import indicators as ict
 
 
@@ -34,7 +36,8 @@ if __name__ == '__main__':
 
     for t in roi:
         for p in period:
-            df['adx'] = ict.adx(df['Close'], df['High'], df['Low'], period=p)
+            help(ta.adx(df['High'], df['Low'], df['Close'], length=p, scalar=1))
+            df['adx'] = ta.adx(df['High'], df['Low'], df['Close'], length=p, scalar=1)
             df['return'] = abs(df['Close'].shift(-1*t) / df['Close'] - 1)
             a = df[['adx', 'return']].corr()
 
