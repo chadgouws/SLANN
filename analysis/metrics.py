@@ -1,5 +1,9 @@
+import collections
+
 import pandas as pd
 import numpy as np
+
+from utils.utils import check_seq_greater_than, check_seq_equal_to
 
 
 def portfolio_correlation(df):
@@ -58,14 +62,80 @@ def profit_factor(df):
     """
 
 
-def roi(df):
+def roi(seq):
     """
     Calculates Return on Investment: final capital subtracted from initial capital divided by initial capital
     :param df:
     :return:
     """
-    portfolio_value = df['Portfolio Value'].to_list()
-    return (portfolio_value[-1] - portfolio_value[0]) / portfolio_value[0]
+    if isinstance(seq, pd.DataFrame):
+        sequence = seq.to_numpy()
+
+    try:
+        if len(seq) == 0:
+            return None
+        elif seq[0] == 0:
+            return None
+        else:
+            return (seq[-1] - seq[0]) / seq[0]
+
+    except TypeError:
+        print(seq, 'is not iterable')
+
+
+def trade_open_time():
+    pass
+
+
+def trade_profit_loss(trade_seq, trade_net_value, asset_value):
+    """
+    Number of winning trades divided by number of winning trades add number of losing trades
+    :param trade_seq:
+    :param trade_net_value:
+    :param asset_value:
+    :return:
+    """
+    if len(list(trade_seq)) > 0:
+        pass
+    else:
+        return None
+
+    if check_seq_greater_than(trade_net_value):
+        pass
+    else:
+        return None
+
+    if check_seq_greater_than(asset_value):
+        pass
+    else:
+        return None
+
+    data = {'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
+    df = pd.DataFrame(data)
+
+    if check_seq_equal_to(df[df['TRADE'] == 'HOLD']['TRADE_NET_VALUE']):
+        pass
+    else:
+        return None
+
+    trade_net_value_total = df.groupby(by=['TRADE']).sum()
+    trades = list(df['TRADE'])
+    if 'BUY' in trades:
+        cost = df['ASSET_VALUE'].iloc[0] - 0.999 * df['TRADE_NET_VALUE'].iloc[0] + \
+               trade_net_value_total.loc['BUY', 'TRADE_NET_VALUE']
+    else:
+        cost = df['ASSET_VALUE'].iloc[0]
+
+    if cost == 0.0:
+        return None
+
+    if 'SELL' in trades:
+        cash = trade_net_value_total.loc['SELL', 'TRADE_NET_VALUE']
+    else:
+        cash = 0
+
+    current_value = df['ASSET_VALUE'].iloc[-1] + cash
+    return round(current_value - cost, 8)
 
 
 def winner_roi_average(df):
@@ -90,17 +160,8 @@ def winner_roi_max(df):
     return df[df['roi'] > 1.0]['roi'].max() - 1
 
 
-def win_ratio(df):
-    """
-    Number of winning trades divided by number of winning trades add number of losing trades
-    :param df:
-    :return:
-    """
-    df = df[df['Trade'] == 'SELL']
-    df = df.dropna()
-    wins = df[df['roi'] > 1.0]['roi'].count()
-    losses = df[df['roi'] <= 1.0]['roi'].count()
-    return wins / (wins + losses)
+def win_ratio(initial):
+    pass
 
 
 if __name__ == '__main__':

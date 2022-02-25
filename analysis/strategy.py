@@ -1,13 +1,23 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from analysis import metrics as mtx
-from indicators import indicators as ict
 
 
-def indicate_trades(df):
-    df['different'] = np.where(df['Trade'] == df['Trade'].shift(1), 1, 0)
+def prepare_trades(df):
+    df = df.copy()
+
+    # Remove trades that nothing is bought or sold
+    df['TRADE_AMT'] = np.where(df['TRADE'] == 'BUY', df['TRADE_AMT'] / df['Close'], df['TRADE_AMT'])
+    df['TRADE_NET_VALUE'] = df['Close'] * np.where(df['TRADE'] == 'BUY', df['TRADE_AMT'], 0.999*df['TRADE_AMT'])
+
+    # Calculate portfolio's value ($)
+    df['PORTFOLIO_VALUE'] = df['CASH'] + df['Close'] * df['ASSET_AMT']
+
+    # Give each trade a number (Trade must must have been opened)
+    df['ind'] = np.where((df['TRADE'] == 'BUY') & (df['ASSET_AMT'].shift(1) == 0.0), 1, 0)
+    df['TRADE_NR'] = df['ind'].cumsum()
+    df = df.drop(columns=['ind'], axis=1)
     return df
 
 

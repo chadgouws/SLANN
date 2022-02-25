@@ -2,6 +2,34 @@ import pandas as pd
 import numpy as np
 
 
+def check_seq_equal_to(seq, marker=None):
+    if marker:
+        marker = marker
+    else:
+        marker = 0
+
+    length = len(seq)
+    check = len([i for i in seq if i == marker])
+    if check == length:
+        return True
+    else:
+        return False
+
+
+def check_seq_greater_than(seq, minimum=None):
+    if minimum:
+        marker = minimum
+    else:
+        marker = 0
+
+    length = len(seq)
+    check = len([i for i in seq if i >= marker])
+    if check == length:
+        return True
+    else:
+        return False
+
+
 def recent_maximum_index(x):
     return int(np.argmax(x[::-1]))
 

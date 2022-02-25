@@ -9,7 +9,6 @@ import pandas_ta as ta
 def prepare_indicators(df):
     # Aroon
     df_aroon = ta.aroon(df['High'], df['Low'], length=300, scalar=1)
-    print(df_aroon)
     # df['aroon_1000'] = ict.aroon(df['High'], df['Low'], period=1000)
 
     # Bollinger Bands
@@ -33,11 +32,11 @@ def prepare_indicators(df):
     df_macd['macd_signal'] = np.where(df_macd['MACD_300_648_9'] > df_macd['MACDs_300_648_9'], 1, 0)
 
     # RSI
-    df['rsi_500'] = ta.rsi(df['Close'], length=500)
+    df['rsi_500'] = ta.rsi(df['Close'], length=500, scalar=1)
     # df['rsi_900'] = ta.rsi(df['Close'], length=900)
 
     # Stochastic
-    df_stoch = ta.stoch(df['High'], df['Low'], df['Close'], length=420, scalar=1)
+    df_stoch = ta.stoch(df['High'], df['Low'], df['Close'], k=420, d=5, scalar=1)
     # df_stoch['stoch_ind'] = np.where(df_stoch['STOCHk_14_3_3'] >= df_stoch['STOCHd_14_3_3'], 1, 0)
 
     # ADX
@@ -48,13 +47,18 @@ def prepare_indicators(df):
     # df['max_return'] = df['return'].rolling(900).max()
     # df['min_return'] = df['return'].rolling(900).min()
 
-    df['aroon_up'] = df_aroon['AROON']
+    df['aroon_up'] = df_aroon['AROONU_300']
+    df['aroon_dn'] = df_aroon['AROOND_300']
     df['macd_signal'] = df_macd['macd_signal']
-    df['stoch_d'] = df_stoch['STOCHd_420_3_3']
+    df['stoch_d'] = df_stoch['STOCHd_420_5_3'] / 100
     return df
 
 
 if __name__ == '__main__':
+
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)
 
     df = pd.read_csv('C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/gemini_BTCUSD_1hr.csv', header=0)
     df = df.sort_values(by=['Date']).reset_index(drop=True)
