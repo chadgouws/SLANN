@@ -58,12 +58,9 @@ class Portfolio:
             if token not in self.asset_amt:
                 self.asset_amt[token] = 0.0
 
-        if isinstance(algo_output, str):
-            algo_output = float(algo_output)
-
-        if algo_output > 0.7:
+        if (algo_output[0] > algo_output[1]) & (algo_output[0] > algo_output[2]):
             self.order_type = self.buy
-        elif algo_output < 0.3:
+        elif (algo_output[2] > algo_output[0]) & (algo_output[2] > algo_output[1]):
             self.order_type = self.sell
         else:
             self.order_type = self.hold

@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.special import softmax
 
 # This script contains activation functions and their respective derivatives that
 # are generally used for deep learning models
@@ -52,12 +53,6 @@ def sigmoid(x):
 
 def sigmoid_derivative(x):
     return sigmoid(x) * (1 - sigmoid(x))
-
-
-def softmax(x):
-    z = np.exp(x)
-    z_ = z.sum()
-    return z_
 
 
 if __name__ == '__main__':

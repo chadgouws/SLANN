@@ -73,16 +73,16 @@ class NeuralNetwork:
 
 class NeuralNetwork5:
 
-    def __init__(self):
-        self.input_size = 5
+    def __init__(self, init=True):
+        self.input_size = 6
         self.layer_1_size = 10
         self.output_size = 3
-        self.weights1 = self._set_nn(weight=1, init=True)
-        self.weights2 = self._set_nn(weight=2, init=True)
+        self.weights1 = self._set_nn(weight=1, init=init)
+        self.weights2 = self._set_nn(weight=2, init=init)
 
     def feedforward(self, input):
         self.layer1 = relu(np.dot(input, self.weights1))
-        return sigmoid(np.dot(self.layer1, self.weights2))
+        return softmax(list(np.dot(self.layer1, self.weights2)))
 
     def backprop(self, input, output, y):
         # application of the chain rule to find derivative of the loss function with respect to weights2 and weights1
@@ -95,15 +95,15 @@ class NeuralNetwork5:
         self.weights1 += d_weights1
         self.weights2 += d_weights2
 
-    def mutate(self):
-        mutation_1 = np.random.rand(self.input_size, self.layer_1_size)
+    def mutate(self, alpha=0.2):
+        mutation_1 = alpha * np.random.rand(self.input_size, self.layer_1_size)
         indicator_11 = np.random.randint(0, 2, (self.input_size, self.layer_1_size))
-        indicator_12 = np.random.randint(0, 3, (self.input_size, self.layer_1_size))
+        indicator_12 = np.random.randint(0, 2, (self.input_size, self.layer_1_size))
         self.weights1 = indicator_11 * indicator_12 * mutation_1 + self.weights1
 
-        mutation_2 = np.random.rand(self.layer_1_size, self.output_size)
+        mutation_2 = alpha * np.random.rand(self.layer_1_size, self.output_size)
         indicator_21 = np.random.randint(0, 2, (self.layer_1_size, self.output_size))
-        indicator_22 = np.random.randint(0, 3, (self.layer_1_size, self.output_size))
+        indicator_22 = np.random.randint(0, 2, (self.layer_1_size, self.output_size))
         self.weights2 = indicator_21 * indicator_22 * mutation_2 + self.weights2
 
     def _set_nn(self, weight=-1, init=False):
@@ -124,28 +124,10 @@ class NeuralNetwork5:
 
 
 if __name__ == '__main__':
-    X = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                  [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0],
-                  [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-                  [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-                  [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0],
-                  [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-                  [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0],
-                  [1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
-                  [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1]])
-    y = np.array([[1],
-                  [0],
-                  [0],
-                  [1],
-                  [1],
-                  [0],
-                  [0],
-                  [1],
-                  [1],
-                  [1]])
+    X = np.array([1, 2, 1, 1, 2])
+    y = np.array([1, 2, 3])
 
-    nn = NeuralNetwork()
+    nn = NeuralNetwork5()
 
 
     print('\ninput')
@@ -160,15 +142,12 @@ if __name__ == '__main__':
 
     count = 0
     actions = pd.DataFrame()
-    for _ in range(10000):
+    for _ in range(10):
         output = nn.feedforward(X)
-        actions = actions.append(pd.DataFrame(output).T, ignore_index=True)
-        nn.backprop(X, output, y)
+        # actions = actions.append(pd.DataFrame(output).T, ignore_index=True)
+        # nn.backprop(X, output, y)
         count += 1
-        print(count)
+        print('\n', count)
         print(output)
+        nn.mutate()
 
-    # print('\nW1')
-    # print(nn.weights1)
-    # print('\nW2')
-    # print(nn.weights2)

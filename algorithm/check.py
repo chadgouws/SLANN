@@ -31,4 +31,4 @@ def test_one():
 
 
 if __name__ == '__main__':
-    test_one()
+    print(np.random.rand(5, 10))

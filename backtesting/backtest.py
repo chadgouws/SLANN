@@ -7,7 +7,9 @@ import numpy as np
 from portfolio.portfolio import Portfolio
 from pipeline.prepare_indicators import prepare_indicators
 from algorithm.model import TestModel
-from analysis.strategy import prepare_trades
+from analysis.strategy import prepare_trades, analyse_strategy
+
+from algorithm.NN import NeuralNetwork5
 
 
 def back_test(df, model, cash_initial=None, buy_weight=None, sell_weight=None):
@@ -26,8 +28,8 @@ def back_test(df, model, cash_initial=None, buy_weight=None, sell_weight=None):
 
     trades = []
     for index, row in df.iterrows():
-        # print(row.values)
-        output = model.feedforward()                                              # Model calc and output
+        tensor = row[['bb_ratio', 'rsi_500', 'aroon_up', 'aroon_dn', 'macd_signal', 'stoch_d']]
+        output = model.feedforward(tensor.values)                             # Model calc and output
         price = {row['Symbol']: row['Close']}
         portfolio.update_prices(price=price)
         portfolio.update_portfolio()
@@ -73,27 +75,32 @@ if __name__ == '__main__':
         df = df.reset_index(drop=True)
 
         # Prepare models for backtesting
-        parent = TestModel()
-        child = TestModel()
+        parent = NeuralNetwork5()
+        child = copy.deepcopy(parent)
+        child = child.mutate()
 
-        # Back test each and compare performance
-        df_parent = back_test(df, parent, cash_initial=100000)                    # Back test parent strategy
+        # Back test parent strategy
+        df_parent = back_test(df, parent, cash_initial=100000)
         df_parent = df_parent.drop(labels=['bb_ratio', 'rsi_500', 'aroon_up', 'aroon_dn', 'macd_signal', 'stoch_d'],
                                    axis=1)
-        print(df_parent)
 
-        # Label trades for analysis
+        # Analyse parent strategy
         df_parent = prepare_trades(df_parent)
-        print(df_parent.head(50))
+        if len(list(df_parent['TRADE'])) == 0:
+            continue
+        metric_parent = analyse_strategy(df_parent)
 
+        # Back test child strategy
+        df_child = back_test(df, parent, cash_initial=100000)
+        df_child = df_child.drop(labels=['bb_ratio', 'rsi_500', 'aroon_up', 'aroon_dn', 'macd_signal', 'stoch_d'],
+                                   axis=1)
 
-        # super_metric_parent = stg.analyse_strategy(df_parent)                   # Analyze parent strategy
-        #
-        # df_child = back_test(df, child)                                         # Back test child strategy
-        # super_metric_child = stg.analyse_strategy(df_parent)                    # Analyze child strategy
-        #
-        # # Check metrics to determine which strategy was better - set new parent
-        # if super_metric_child >= super_metric_parent:
-        #     parent = copy.deepcopy(child)
-        #
-        # print('Super metric: ', super_metric_parent)
+        # Analyse child strategy
+        df_child = prepare_trades(df_child)
+        metric_child = analyse_strategy(df_child)
+
+        # Check metrics to determine which strategy was better - set new parent
+        if metric_child['SUPER_METRIC'] >= metric_parent['SUPER_METRIC']:
+            parent = copy.deepcopy(child)
+
+        print('Super metric: ', metric_parent['SUPER_METRIC'])

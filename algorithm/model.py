@@ -3,8 +3,11 @@ import random
 
 class TestModel:
 
-    def feedforward(self):
+    def feedforward(self, data):
         return random.random()
+
+    def mutate(self):
+        pass
 
 
 if __name__ == '__main__':

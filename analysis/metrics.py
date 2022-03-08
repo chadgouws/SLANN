@@ -24,26 +24,56 @@ def count_drawdowns(df, period=5, floor=-0.03):
     """
 
 
-def loser_roi_average(df):
+def loser_roi_average(trade_number, trade_seq, trade_net_value, asset_value):
     """
-
-    :param df:
+    Calculate the average loss taken on a single losing trade
+    :param trade_number:
+    :param trade_seq:
+    :param trade_net_value:
+    :param asset_value:
     :return:
     """
-    df = df[df['Trade'] == 'SELL']
-    df = df.dropna()
-    return df[df['roi'] <= 1.0]['roi'].mean() - 1
+    data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
+    df = pd.DataFrame(data)
+    no_of_trades = df['TRADE_NR'].max() + 1
+
+    roi = []
+    for i in range(no_of_trades):
+        df_calc = df[df['TRADE_NR'] == i]
+        value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
+        if value - cost <= 0:
+            roi.append((value - cost) / cost)
+
+    if len(roi) > 0:
+        return np.mean(roi)
+    else:
+        return 0
 
 
-def loser_roi_max(df):
+def loser_roi_max(trade_number, trade_seq, trade_net_value, asset_value):
     """
-
-    :param df:
+    Calculate the maximum loss taken on a single losing trade
+    :param trade_number:
+    :param trade_seq:
+    :param trade_net_value:
+    :param asset_value:
     :return:
     """
-    df = df[df['Trade'] == 'SELL']
-    df = df.dropna()
-    return df[df['roi'] <= 1.0]['roi'].min() - 1
+    data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
+    df = pd.DataFrame(data)
+    no_of_trades = df['TRADE_NR'].max() + 1
+
+    roi = []
+    for i in range(no_of_trades):
+        df_calc = df[df['TRADE_NR'] == i]
+        value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
+        if value - cost <= 0:
+            roi.append((value - cost) / cost)
+
+    if len(roi) > 0:
+        return min(roi)
+    else:
+        return 0
 
 
 def max_drawdown(df):
@@ -65,11 +95,11 @@ def profit_factor(df):
 def roi(seq):
     """
     Calculates Return on Investment: final capital subtracted from initial capital divided by initial capital
-    :param df:
+    :param seq:
     :return:
     """
-    if isinstance(seq, pd.DataFrame):
-        sequence = seq.to_numpy()
+    if isinstance(seq, pd.Series):
+        seq = list(seq.to_numpy())
 
     try:
         if len(seq) == 0:
@@ -87,7 +117,7 @@ def trade_open_time():
     pass
 
 
-def trade_profit_loss(trade_seq, trade_net_value, asset_value):
+def trade_value_cost(trade_seq, trade_net_value, asset_value):
     """
     Number of winning trades divided by number of winning trades add number of losing trades
     :param trade_seq:
@@ -118,50 +148,113 @@ def trade_profit_loss(trade_seq, trade_net_value, asset_value):
     else:
         return None
 
-    trade_net_value_total = df.groupby(by=['TRADE']).sum()
     trades = list(df['TRADE'])
-    if 'BUY' in trades:
-        cost = df['ASSET_VALUE'].iloc[0] - 0.999 * df['TRADE_NET_VALUE'].iloc[0] + \
-               trade_net_value_total.loc['BUY', 'TRADE_NET_VALUE']
+    if trades[0] == 'BUY':
+        existing_cost = df['ASSET_VALUE'].iloc[0] - 0.999 * df['TRADE_NET_VALUE'].iloc[0]
+    elif trades[0] == 'SELL':
+        existing_cost = df['ASSET_VALUE'].iloc[0] + df['TRADE_NET_VALUE'].iloc[0] / 0.999
+    elif trades[0] == 'HOLD':
+        existing_cost = df['ASSET_VALUE'].iloc[0]
     else:
-        cost = df['ASSET_VALUE'].iloc[0]
+        existing_cost = 0.0
 
-    if cost == 0.0:
-        return None
+    trade_net_value_total = df.groupby(['TRADE']).sum()
+
+    if 'BUY' in trades:
+        buy_cost = trade_net_value_total.loc['BUY', 'TRADE_NET_VALUE']
+    else:
+        buy_cost = 0
 
     if 'SELL' in trades:
         cash = trade_net_value_total.loc['SELL', 'TRADE_NET_VALUE']
     else:
         cash = 0
 
+    cost = buy_cost + existing_cost / 0.999
+    # print(cost)
+    if cost == 0.0:
+        return None
+
     current_value = df['ASSET_VALUE'].iloc[-1] + cash
-    return round(current_value - cost, 8)
+    return current_value, cost
 
 
-def winner_roi_average(df):
+def winner_roi_average(trade_number, trade_seq, trade_net_value, asset_value):
     """
-
-    :param df:
+    Calculate the average win taken on a single winning trade
+    :param trade_number:
+    :param trade_seq:
+    :param trade_net_value:
+    :param asset_value:
     :return:
     """
-    df = df[df['Trade'] == 'SELL']
-    df = df.dropna()
-    return df[df['roi'] > 1.0]['roi'].mean() - 1
+    data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
+    df = pd.DataFrame(data)
+    no_of_trades = df['TRADE_NR'].max() + 1
+
+    roi = []
+    for i in range(no_of_trades):
+        df_calc = df[df['TRADE_NR'] == i]
+        value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
+        if value - cost > 0:
+            roi.append((value - cost) / cost)
+
+    if len(roi) > 0:
+        return np.mean(roi)
+    else:
+        return 0
 
 
-def winner_roi_max(df):
+def winner_roi_max(trade_number, trade_seq, trade_net_value, asset_value):
     """
-
-    :param df:
+    Calculate the max win taken on a single winning trade
+    :param trade_number:
+    :param trade_seq:
+    :param trade_net_value:
+    :param asset_value:
     :return:
     """
-    df = df[df['Trade'] == 'SELL']
-    df = df.dropna()
-    return df[df['roi'] > 1.0]['roi'].max() - 1
+    data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
+    df = pd.DataFrame(data)
+    no_of_trades = df['TRADE_NR'].max() + 1
+
+    roi = []
+    for i in range(no_of_trades):
+        df_calc = df[df['TRADE_NR'] == i]
+        value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
+        if value - cost > 0:
+            roi.append((value - cost) / cost)
+
+    if len(roi) > 0:
+        return max(roi)
+    else:
+        return 0
 
 
-def win_ratio(initial):
-    pass
+def win_ratio(trade_number, trade_seq, trade_net_value, asset_value):
+    """
+    Calculate the win ratio of all trades in a given timeframe
+    :param trade_number:
+    :param trade_seq:
+    :param trade_net_value:
+    :param asset_value:
+    :return:
+    """
+    data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
+    df = pd.DataFrame(data)
+    no_of_trades = df['TRADE_NR'].max() + 1
+
+    winner = []
+    for i in range(no_of_trades):
+        df_calc = df[df['TRADE_NR'] == i]
+        value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
+        if value - cost > 0:
+            winner.append((value - cost) / cost)
+
+    if len(winner) > 0:
+        return len(winner) / no_of_trades
+    else:
+        return 0.0
 
 
 if __name__ == '__main__':
