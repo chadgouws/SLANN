@@ -20,6 +20,7 @@ def prepare_trades(df):
     df['CHECK'] = df.groupby(['TRADE_NR'])['TRADE_NET_VALUE'].transform('mean')
     df = df[df['CHECK'] != 0.0]
 
+    df = df.reset_index()
     df = df.drop(columns=['ind', 'CHECK'], axis=1)
     return df
 
@@ -36,11 +37,45 @@ def analyse_strategy(df, roi=0.3, win_ratio=0.2, winner_roi_avg=0.1, loser_roi_a
         loser_roi_avg_ = mtx.loser_roi_average(df['TRADE_NR'], df['TRADE'], df['TRADE_NET_VALUE'], df['ASSET_VALUE'])
         winner_roi_max_ = mtx.winner_roi_max(df['TRADE_NR'], df['TRADE'], df['TRADE_NET_VALUE'], df['ASSET_VALUE'])
         loser_roi_max_ = mtx.loser_roi_max(df['TRADE_NR'], df['TRADE'], df['TRADE_NET_VALUE'], df['ASSET_VALUE'])
+        no_of_trades = mtx.no_of_trades(df['TRADE_NR'])
 
-        super_metric = roi*roi_ + win_ratio*win_ratio_ + winner_roi_avg*winner_roi_avg_ + \
+        if no_of_trades <= 1:
+            trades_value = 0.0
+        elif no_of_trades == 2:
+            trades_value = no_of_trades
+        elif no_of_trades == 3:
+            trades_value = no_of_trades
+        elif no_of_trades == 4:
+            trades_value = no_of_trades
+        else:
+            trades_value = 5
+
+        # Std dev of portfolio & asset
+        close_normalized = 100 * df['Close'] / df['Close'].iloc[0]
+        portfolio_normalized = 100 * df['PORTFOLIO_VALUE'] / df['PORTFOLIO_VALUE'].iloc[0]
+
+        std_dev_asset = close_normalized.std()
+        std_dev_portfolio = portfolio_normalized.std()
+
+        range_asset = close_normalized.max() - close_normalized.min()
+        range_portfolio = portfolio_normalized.max() - portfolio_normalized.min()
+
+        roi_asset = mtx.roi(df['Close'])
+
+        # Portfolio correlation with asset
+        roi_hr_asset = df['Close'] / df['Close'].shift(1) - 1
+        roi_hr_portfolio = df['PORTFOLIO_VALUE'] / df['PORTFOLIO_VALUE'].shift(1) - 1
+        df_corr = pd.DataFrame({'ASSET': roi_hr_asset, 'PORTFOLIO': roi_hr_portfolio})
+        df_corr = df_corr.corr()
+        corr = df_corr.loc['ASSET', 'PORTFOLIO']
+
+        super_metric = trades_value + roi*roi_ + win_ratio*win_ratio_ + winner_roi_avg*winner_roi_avg_ + \
                        loser_roi_avg*loser_roi_avg_ + winner_roi_max*winner_roi_max_ + loser_roi_max*loser_roi_max_
         return {'SUPER_METRIC': super_metric, 'ROI': roi_, 'WIN_RATIO': win_ratio_, 'WINNER_ROI_AVG': winner_roi_avg_,
-                'LOSER_ROI_AVG': loser_roi_avg_, 'WINNER_ROI_MAX': winner_roi_max_, 'LOSER_ROI_MAX': loser_roi_max_}
+                'LOSER_ROI_AVG': loser_roi_avg_, 'WINNER_ROI_MAX': winner_roi_max_, 'LOSER_ROI_MAX': loser_roi_max_,
+                'ROI_ASSET': roi_asset, 'STD_DEV_ASSET': std_dev_asset, 'STD_DEV_PORTFOLIO': std_dev_portfolio,
+                'RANGE_ASSET': range_asset, 'RANGE_PORTFOLIO': range_portfolio, 'CORR': corr,
+                'NO_OF_TRADES': no_of_trades}
 
     else:
         print('SUM OF SUPER METRIC WEIGHTS EQUALS %f (MUST EQUAL 1.0)' % super_metric_)

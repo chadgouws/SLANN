@@ -35,10 +35,10 @@ def loser_roi_average(trade_number, trade_seq, trade_net_value, asset_value):
     """
     data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
     df = pd.DataFrame(data)
-    no_of_trades = df['TRADE_NR'].max() + 1
+    trades = set(df['TRADE_NR'])
 
     roi = []
-    for i in range(no_of_trades):
+    for i in trades:
         df_calc = df[df['TRADE_NR'] == i]
         value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
         if value - cost <= 0:
@@ -61,10 +61,10 @@ def loser_roi_max(trade_number, trade_seq, trade_net_value, asset_value):
     """
     data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
     df = pd.DataFrame(data)
-    no_of_trades = df['TRADE_NR'].max() + 1
+    trades = set(df['TRADE_NR'])
 
     roi = []
-    for i in range(no_of_trades):
+    for i in trades:
         df_calc = df[df['TRADE_NR'] == i]
         value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
         if value - cost <= 0:
@@ -82,6 +82,16 @@ def max_drawdown(df):
     :param df:
     :return:
     """
+
+
+def no_of_trades(trade_nr):
+    """
+    Allocates points based on the number of trades made
+    :param trade_nr:
+    :return:
+    """
+    trade_nr = set(trade_nr)
+    return len(trade_nr)
 
 
 def profit_factor(df):
@@ -190,10 +200,10 @@ def winner_roi_average(trade_number, trade_seq, trade_net_value, asset_value):
     """
     data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
     df = pd.DataFrame(data)
-    no_of_trades = df['TRADE_NR'].max() + 1
+    trades = set(df['TRADE_NR'])
 
     roi = []
-    for i in range(no_of_trades):
+    for i in trades:
         df_calc = df[df['TRADE_NR'] == i]
         value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
         if value - cost > 0:
@@ -216,10 +226,10 @@ def winner_roi_max(trade_number, trade_seq, trade_net_value, asset_value):
     """
     data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
     df = pd.DataFrame(data)
-    no_of_trades = df['TRADE_NR'].max() + 1
+    trades = set(df['TRADE_NR'])
 
     roi = []
-    for i in range(no_of_trades):
+    for i in trades:
         df_calc = df[df['TRADE_NR'] == i]
         value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
         if value - cost > 0:
@@ -242,17 +252,17 @@ def win_ratio(trade_number, trade_seq, trade_net_value, asset_value):
     """
     data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value, 'ASSET_VALUE': asset_value}
     df = pd.DataFrame(data)
-    no_of_trades = df['TRADE_NR'].max() + 1
+    trades = set(df['TRADE_NR'])
 
     winner = []
-    for i in range(no_of_trades):
+    for i in trades:
         df_calc = df[df['TRADE_NR'] == i]
         value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
         if value - cost > 0:
             winner.append((value - cost) / cost)
 
     if len(winner) > 0:
-        return len(winner) / no_of_trades
+        return len(winner) / len(trades)
     else:
         return 0.0
 

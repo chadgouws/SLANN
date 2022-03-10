@@ -24,16 +24,19 @@ def write_df_to_file(df, csv_file, rows=None):
         df.iloc[:rows].to_csv(csv_file, index=False)
 
 
-def write_nn_to_file(nn, algo, gen=0):
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W1_' +
-               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '_' + str(gen) + '.csv',
+def write_nn_to_file(nn, algo, middle_layer_activation_func='relu', output_activation_func='softmax',
+                     input_size=None, layer_1_size=None, layer_2_size=None, output_size=None, periods=None,
+                     iterations=None, current_date=datetime.datetime.now()):
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/backtesting/backtesting_data/metrics/nn_architecture_' + algo +
+               '_W1_' + middle_layer_activation_func + '-' + output_activation_func + '-' + input_size + '-' +
+               layer_1_size + '-' + layer_2_size + '-' + output_size + '_' + str(periods) + '-' + str(iterations) +
+               '_' + current_date.strftime('%Y-%m-%dT%H-%M-%S') + '.csv',
                nn.weights1, delimiter=",")
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W2_' +
-               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '_' + str(gen) + '.csv',
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/backtesting/backtesting_data/metrics/nn_architecture_' + algo +
+               '_W2_' + middle_layer_activation_func + '-' + output_activation_func + '-' + input_size + '-' +
+               layer_1_size + '-' + layer_2_size + '-' + output_size + '_' + str(periods) + '-' + str(iterations) +
+               '_' + current_date.strftime('%Y-%m-%dT%H-%M-%S') + '.csv',
                nn.weights2, delimiter=",")
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/data/nn_architecture/' + algo + '_research_W3_' +
-               datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S') + '_' + str(gen) + '.csv',
-               nn.weights3, delimiter=",")
 
 
 def read_nn_from_file(file_path):

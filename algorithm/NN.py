@@ -97,13 +97,13 @@ class NeuralNetwork5:
 
     def mutate(self, alpha=0.2):
         mutation_1 = alpha * np.random.rand(self.input_size, self.layer_1_size)
-        indicator_11 = np.random.randint(0, 2, (self.input_size, self.layer_1_size))
-        indicator_12 = np.random.randint(0, 2, (self.input_size, self.layer_1_size))
+        indicator_11 = np.random.randint(-1, 2, (self.input_size, self.layer_1_size))
+        indicator_12 = np.random.randint(-1, 2, (self.input_size, self.layer_1_size))
         self.weights1 = indicator_11 * indicator_12 * mutation_1 + self.weights1
 
         mutation_2 = alpha * np.random.rand(self.layer_1_size, self.output_size)
-        indicator_21 = np.random.randint(0, 2, (self.layer_1_size, self.output_size))
-        indicator_22 = np.random.randint(0, 2, (self.layer_1_size, self.output_size))
+        indicator_21 = np.random.randint(-1, 2, (self.layer_1_size, self.output_size))
+        indicator_22 = np.random.randint(-1, 2, (self.layer_1_size, self.output_size))
         self.weights2 = indicator_21 * indicator_22 * mutation_2 + self.weights2
 
     def _set_nn(self, weight=-1, init=False):

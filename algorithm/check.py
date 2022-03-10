@@ -31,4 +31,11 @@ def test_one():
 
 
 if __name__ == '__main__':
-    print(np.random.rand(5, 10))
+    mutation_2 = np.random.rand(3, 3)
+    print(mutation_2)
+    indicator_21 = np.random.randint(-1, 2, (3, 3))
+    print(indicator_21)
+    indicator_22 = np.random.randint(-1, 2, (3, 3))
+    print(indicator_22)
+    weights2 = indicator_21 * indicator_22 * mutation_2
+    print(weights2)
