@@ -8,11 +8,11 @@ import pandas_ta as ta
 
 def prepare_indicators(df):
     # Aroon
-    df_aroon = ta.aroon(df['High'], df['Low'], length=300, scalar=1)
+    df_aroon = ta.aroon(df['high'], df['low'], length=300, scalar=1)
     # df['aroon_1000'] = ict.aroon(df['High'], df['Low'], period=1000)
 
     # Bollinger Bands
-    df_bb = ta.bbands(df['Close'], length=8)
+    df_bb = ta.bbands(df['close'], length=8)
     df['bb_ratio'] = df_bb['BBM_8_2.0'] / df_bb['BBL_8_2.0'] - 1
     df['bb_ratio'] = np.where(df['bb_ratio'] > 2, 2, df['bb_ratio'])
 
@@ -28,15 +28,15 @@ def prepare_indicators(df):
     # df['price_ind_750'] = np.where(df['Close'] > df['sma_750'], 1, 0)
 
     # MACD
-    df_macd = ta.macd(df['Close'], fast=300, slow=648)
+    df_macd = ta.macd(df['close'], fast=300, slow=648)
     df_macd['macd_signal'] = np.where(df_macd['MACD_300_648_9'] > df_macd['MACDs_300_648_9'], 1, 0)
 
     # RSI
-    df['rsi_500'] = ta.rsi(df['Close'], length=500, scalar=1)
+    df['rsi_500'] = ta.rsi(df['close'], length=500, scalar=1)
     # df['rsi_900'] = ta.rsi(df['Close'], length=900)
 
     # Stochastic
-    df_stoch = ta.stoch(df['High'], df['Low'], df['Close'], k=420, d=5, scalar=1)
+    df_stoch = ta.stoch(df['high'], df['low'], df['close'], k=420, d=5, scalar=1)
     # df_stoch['stoch_ind'] = np.where(df_stoch['STOCHk_14_3_3'] >= df_stoch['STOCHd_14_3_3'], 1, 0)
 
     # ADX

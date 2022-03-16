@@ -1,3 +1,4 @@
+import os
 import copy
 import random
 import datetime
@@ -55,8 +56,8 @@ if __name__ == '__main__':
     # Periods and iterations
     current_date = datetime.datetime.now()
     periods = 2000
-    iterations = 1
-    sample_size = 10
+    iterations = 10
+    sample_size = 20
 
     # Neural Network Structure
     input_size = '6'
@@ -66,19 +67,20 @@ if __name__ == '__main__':
     middle_layer_activation_func = 'relu'
     output_activation_func = 'softmax'
 
+    # Price data files
+    price_files = os.listdir('C:/Users/chadg/GARD/Projects/slann/data/price')
+
     # Create data file
     df_metrics = pd.DataFrame(columns=['ITERATION', 'SUPER_METRIC', 'ROI', 'WIN_RATIO', 'WINNER_ROI_AVG',
                                        'LOSER_ROI_AVG', 'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET',
                                        'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET', 'RANGE_PORTFOLIO',
                                        'CORR', 'NO_OF_TRADES'])
     file_name = 'C:/Users/chadg/GARD/Projects/slann/backtesting/backtesting_data/metrics/nn_architecture_' + \
-                middle_layer_activation_func + '-' + output_activation_func + '-' + input_size + '-' + \
-                layer_1_size + '-' + layer_2_size + '-' + output_size + '_' + str(periods) + '-' + str(iterations) + \
-                '_' + current_date.strftime('%Y-%m-%dT%H-%M-%S') + '.csv'
-    df_metrics.to_csv(file_name, index=False)
+                'relu-softmax-6-10-None-3_2000-10_2022-03-11T10-55-14.csv'
+    # df_metrics.to_csv(file_name, index=False)
 
     # Initialize trading strategy (Neural Network ML model)
-    parent = NeuralNetwork5()
+    parent = NeuralNetwork5(init=False)
 
     # Iterate through learning process
     for i in range(iterations):
@@ -89,20 +91,24 @@ if __name__ == '__main__':
 
         # Create dataframes for child vs parent metric comparison
         parent_sample_metrics = pd.DataFrame(columns=['ITERATION', 'SUPER_METRIC', 'ROI', 'WIN_RATIO', 'WINNER_ROI_AVG',
-                                               'LOSER_ROI_AVG', 'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET',
-                                               'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET', 'RANGE_PORTFOLIO',
-                                               'CORR', 'NO_OF_TRADES'])
+                                                      'LOSER_ROI_AVG', 'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET',
+                                                      'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET',
+                                                      'RANGE_PORTFOLIO', 'CORR', 'NO_OF_TRADES'])
         child_sample_metrics = pd.DataFrame(columns=['ITERATION', 'SUPER_METRIC', 'ROI', 'WIN_RATIO', 'WINNER_ROI_AVG',
-                                              'LOSER_ROI_AVG', 'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET',
-                                              'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET', 'RANGE_PORTFOLIO',
-                                              'CORR', 'NO_OF_TRADES'])
+                                                     'LOSER_ROI_AVG', 'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET',
+                                                     'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET',
+                                                     'RANGE_PORTFOLIO', 'CORR', 'NO_OF_TRADES'])
 
         for s in range(sample_size):
 
             # select data for back testing
-            df = pd.read_csv('C:/Users/chadg/GARD/Projects/slann/data/price_ticker/real/gemini_BTCUSD_1hr.csv', header=0)
+            file_index = np.random.randint(0, len(price_files))
+            df = pd.read_csv('C:/Users/chadg/GARD/Projects/slann/data/price/' + price_files[file_index],
+                             header=0)
+            df['date'] = pd.to_datetime(df['date'])
+            df = df[df['date'] < datetime.datetime(2020, 1, 1, 0, 0, 0)]
 
-            rows = len(df['Close'].to_list())
+            rows = len(df['close'].to_list())
             start = random.randint(0, rows - periods)
 
             df = df[start:start + periods]
@@ -111,7 +117,7 @@ if __name__ == '__main__':
             # prepare data and calculate indicators
             df = prepare_indicators(df)
             df = df.dropna()
-            df = df.drop(['Unix Timestamp', 'Open', 'High', 'Low', 'Volume'], axis=1)
+            df = df.drop(['unix', 'open', 'high', 'low', 'volume'], axis=1)
             df = df.reset_index(drop=True)
 
             drop_columns = ['bb_ratio', 'rsi_500', 'aroon_up', 'aroon_dn', 'macd_signal', 'stoch_d']
@@ -142,28 +148,27 @@ if __name__ == '__main__':
 
         if metrics_child['SUPER_METRIC'] >= metrics_parent['SUPER_METRIC']:
             parent = child
-            df_metrics = df_metrics.append(metrics_child, ignore_index=True)
+            df_metrics = pd.DataFrame(metrics_child, index=[0])
         else:
             parent = parent
-            df_metrics = df_metrics.append(metrics_parent, ignore_index=True)
+            df_metrics = pd.DataFrame(metrics_parent, index=[0])
 
         # Write back testing data to file
-        df_metrics.to_csv(file_name, mode='a', index=False)
+        df_metrics.to_csv(file_name, mode='a', index=False, header=False)
 
+        # Print Super Metric Information
         print('%d) Super metric: ' % i, round(metrics_parent['SUPER_METRIC'], 4))
 
-
+        # Check Super Metric for NaN - reset NN if necessary
+        if np.isnan(metrics_parent['SUPER_METRIC']):
+            parent = NeuralNetwork5()
 
     # Write NN architecture to file
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/backtesting/backtesting_data/neural_networks/nn_architecture_SMGANN' +
-               '_' + current_date.strftime('%Y-%m-%dT%H-%M-%S') + '_W1_' +
-               middle_layer_activation_func + '-' + output_activation_func + '-' +
-               input_size + '-' + layer_1_size + '-' + layer_2_size + '-' + output_size + '_' +
-               str(periods) + '-' + str(iterations) + '.csv',
-               parent.weights1, delimiter=",")
-    np.savetxt('C:/Users/chadg/GARD/Projects/slann/backtesting/backtesting_data/neural_networks/nn_architecture_SMGANN' +
-               '_' + current_date.strftime('%Y-%m-%dT%H-%M-%S') + '_W2_' +
-               middle_layer_activation_func + '-' + output_activation_func + '-' +
-               input_size + '-' + layer_1_size + '-' + layer_2_size + '-' + output_size + '_' +
-               str(periods) + '-' + str(iterations) + '.csv',
-               parent.weights2, delimiter=",")
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/backtesting/backtesting_data/neural_networks/SMGANN' +
+               '_' + current_date.strftime('%Y-%m-%dT%H-%M-%S') + '_W1_' + middle_layer_activation_func +
+               '-' + output_activation_func + '-' + input_size + '-' + layer_1_size + '-' + layer_2_size +
+               '-' + output_size + '_' + str(periods) + '-' + str(iterations) + '.csv', parent.weights1, delimiter=",")
+    np.savetxt('C:/Users/chadg/GARD/Projects/slann/backtesting/backtesting_data/neural_networks/SMGANN' +
+               '_' + current_date.strftime('%Y-%m-%dT%H-%M-%S') + '_W2_' + middle_layer_activation_func +
+               '-' + output_activation_func + '-' + input_size + '-' + layer_1_size + '-' + layer_2_size +
+               '-' + output_size + '_' + str(periods) + '-' + str(iterations) + '.csv', parent.weights2, delimiter=",")

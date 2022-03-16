@@ -111,12 +111,12 @@ class NeuralNetwork5:
             if init:
                 w = np.random.rand(self.input_size, self.layer_1_size)
             else:
-                w = prep.read_nn_from_file('SMGANN_research_W1_2021-08-11T14-45-26_4000.csv')
+                w = prep.read_nn_from_file('SMGANN_2022-03-11T12-15-16_W1_relu-softmax-6-10-None-3_2000-10.csv')
         elif weight == 2:
             if init:
                 w = np.random.rand(self.layer_1_size, self.output_size)
             else:
-                w = prep.read_nn_from_file('SMGANN_research_W2_2021-08-11T14-45-26_4000.csv')
+                w = prep.read_nn_from_file('SMGANN_2022-03-11T12-15-16_W2_relu-softmax-6-10-None-3_2000-10.csv')
         else:
             pass
 
