@@ -76,12 +76,19 @@ def loser_roi_max(trade_number, trade_seq, trade_net_value, asset_value):
         return 0
 
 
-def max_drawdown(df):
+def max_drawdown(portfolio_value):
     """
-
+    Maximum drawdown is the greatest distance, or loss, from a previous equity peak.
     :param df:
     :return:
     """
+    portfolio_value = pd.Series(portfolio_value)
+    peak = max(portfolio_value)
+    peak_index = portfolio_value.idxmax()
+    portfolio_value = portfolio_value[portfolio_value.index >= peak_index]
+    trough = min(portfolio_value)
+
+    return (trough - peak) / peak
 
 
 def no_of_trades(trade_nr):
@@ -94,12 +101,31 @@ def no_of_trades(trade_nr):
     return len(trade_nr)
 
 
-def profit_factor(df):
+def profit_factor(trade_number, trade_seq, trade_net_value, asset_value):
     """
-
+    Calculates as the gross profit divided by the gross loss for the trading period, inclusive of fees.
+    This metric relates the amount of profit per unit of risk, with values greater than one indicating
+    a profitable system.
     :param df:
     :return:
     """
+    data = {'TRADE_NR': trade_number, 'TRADE': trade_seq, 'TRADE_NET_VALUE': trade_net_value,
+            'ASSET_VALUE': asset_value}
+    df = pd.DataFrame(data)
+    trades = set(df['TRADE_NR'])
+
+    gross_profit = 0
+    gross_loss = 0
+    for i in trades:
+        df_calc = df[df['TRADE_NR'] == i]
+        value, cost = trade_value_cost(df_calc['TRADE'], df_calc['TRADE_NET_VALUE'], df_calc['ASSET_VALUE'])
+        trade_return = value - cost
+        if trade_return > 0:
+            gross_profit += trade_return
+        else:
+            gross_loss -= trade_return
+
+    return gross_profit / gross_loss
 
 
 def roi(seq):
@@ -129,7 +155,7 @@ def trade_open_time():
 
 def trade_value_cost(trade_seq, trade_net_value, asset_value):
     """
-    Number of winning trades divided by number of winning trades add number of losing trades
+    Calculates the current value of a trade and the cost of the trade
     :param trade_seq:
     :param trade_net_value:
     :param asset_value:

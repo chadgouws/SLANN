@@ -3,7 +3,7 @@ import unittest
 import pandas as pd
 import numpy as np
 
-from analysis.metrics import roi, trade_value_cost, win_ratio
+from analysis.metrics import roi, trade_value_cost, win_ratio, max_drawdown, profit_factor
 
 
 df = pd.read_csv('C:/Users/chadg/GARD/Projects/slann/analysis/tests/metrics.test_data.csv')
@@ -27,6 +27,86 @@ class TestLoserROIAvg(unittest.TestCase):
 class TestLoserROIMax(unittest.TestCase):
 
     def test_something(self):
+        pass
+
+
+class TestMaxDrawDown(unittest.TestCase):
+
+    def test_list(self):
+        data = [10, 15, 20, 30, 25, 26, 28, 25, 20]
+        peak = 30
+        trough = 20
+        control = (trough - peak) / peak
+        test = max_drawdown(data)
+        self.assertEqual(control, test, 'List breaks max drawdown')
+
+    def test_tuple(self):
+        data = (10, 15, 20, 30, 25, 26, 28, 25, 20)
+        peak = 30
+        trough = 20
+        control = (trough - peak) / peak
+        test = max_drawdown(data)
+        self.assertEqual(control, test, 'Tuple breaks max drawdown')
+
+    def test_series(self):
+        data = pd.Series([10, 15, 20, 30, 25, 26, 28, 25, 20])
+        peak = 30
+        trough = 20
+        control = (trough - peak) / peak
+        test = max_drawdown(data)
+        self.assertEqual(control, test, 'Pandas Series breaks max drawdown')
+
+    def test_negative(self):
+        data = [40, 15, 20, 30, 25, 26, 28, 25, 20]
+        peak = 40
+        trough = 15
+        control = (trough - peak) / peak
+        test = max_drawdown(data)
+        self.assertEqual(control, test, 'Negative breaks max drawdown')
+
+    def test_no_change(self):
+        data = [10, 10, 10, 10, 10, 10, 10, 10, 10]
+        peak = 10
+        trough = 10
+        control = (trough - peak) / peak
+        test = max_drawdown(data)
+        self.assertEqual(control, test, 'Zero breaks max drawdown')
+
+    def test_zero(self):
+        data = [10, 15, 20, 30, 30, 30, 30, 30, 30]
+        peak = 30
+        trough = 30
+        control = (trough - peak) / peak
+        test = max_drawdown(data)
+        self.assertEqual(control, test, 'Zero breaks max drawdown')
+
+    def test_positive(self):
+        data = [10, 15, 20, 30, 30, 30, 30, 35, 40]
+        peak = 40
+        trough = 40
+        control = (trough - peak) / peak
+        test = max_drawdown(data)
+        self.assertEqual(control, test, 'Zero breaks max drawdown')
+
+
+class TestProfitFactor(unittest.TestCase):
+
+    def test_list(self):
+        pass
+
+    def test_tuple(self):
+        pass
+
+    def test_series(self):
+        pass
+
+    def test_negative(self):
+        pass
+
+    def test_zero(self):
+        pass
+
+    def test_positive(self):
         pass
 
 

@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 from portfolio.portfolio import Portfolio
-from pipeline.prepare_indicators import prepare_indicators
+from pipeline.prepare_indicators import prepare_indicators, build_period
 from pipeline.prepare_data import write_nn_to_file
 
 from algorithm.model import TestModel
@@ -28,21 +28,22 @@ def back_test(df, model, cash_initial=None, buy_weight=None, sell_weight=None):
     else:
         portfolio = Portfolio()
 
+    # This needs to be checked BIG TIME
     portfolio.asset_amt['BTCUSD'] = 0.0
 
     trades = []
     for index, row in df.iterrows():
-        tensor = row[['bb_ratio', 'rsi_500', 'aroon_up', 'aroon_dn', 'macd_signal', 'stoch_d']]
+        tensor = row[['bb_ratio', 'rsi_14', 'rsi_sma_diff', 'aroon_up', 'aroon_dn', 'stoch_d']]
         output = model.feedforward(tensor.values)                             # Model calc and output
-        price = {row['Symbol']: row['Close']}
+        price = {row['symbol']: row['close']}
         portfolio.update_prices(price=price)
         portfolio.update_portfolio()
-        portfolio.get_order_type(output, token=row['Symbol'])
-        portfolio.trade_pair(row['Symbol'])
+        portfolio.get_order_type(output, token=row['symbol'])
+        portfolio.trade_pair(row['symbol'])
         portfolio.update_portfolio()
 
         trades.append([portfolio.order_type, portfolio.trade_amt, portfolio.asset_amt['cash'],
-                       portfolio.asset_amt[row['Symbol']], portfolio.asset_values[row['Symbol']]])
+                       portfolio.asset_amt[row['symbol']], portfolio.asset_values[row['symbol']]])
 
     df_trades = pd.DataFrame(trades, columns=['TRADE', 'TRADE_AMT', 'CASH', 'ASSET_AMT', 'ASSET_VALUE'])
     df_all = df.copy()
@@ -52,12 +53,14 @@ def back_test(df, model, cash_initial=None, buy_weight=None, sell_weight=None):
 
 
 if __name__ == '__main__':
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)
 
     # Periods and iterations
     current_date = datetime.datetime.now()
-    periods = 2000
-    iterations = 10
-    sample_size = 20
+    periods = 1000
+    iterations = 2000
+    sample_size = 10
 
     # Neural Network Structure
     input_size = '6'
@@ -67,16 +70,17 @@ if __name__ == '__main__':
     middle_layer_activation_func = 'relu'
     output_activation_func = 'softmax'
 
+    metric_names = ['ITERATION', 'SUPER_METRIC', 'ROI', 'WIN_RATIO', 'MAX_DRAWDOWN', 'WINNER_ROI_AVG', 'LOSER_ROI_AVG',
+                    'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET', 'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET',
+                    'RANGE_PORTFOLIO', 'CORR', 'NO_OF_TRADES']
+
     # Price data files
     price_files = os.listdir('C:/Users/chadg/GARD/Projects/slann/data/price')
 
     # Create data file
-    df_metrics = pd.DataFrame(columns=['ITERATION', 'SUPER_METRIC', 'ROI', 'WIN_RATIO', 'WINNER_ROI_AVG',
-                                       'LOSER_ROI_AVG', 'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET',
-                                       'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET', 'RANGE_PORTFOLIO',
-                                       'CORR', 'NO_OF_TRADES'])
+    df_metrics = pd.DataFrame(columns=metric_names)
     file_name = 'C:/Users/chadg/GARD/Projects/slann/backtesting/backtesting_data/metrics/nn_architecture_' + \
-                'relu-softmax-6-10-None-3_2000-10_2022-03-11T10-55-14.csv'
+                'relu-softmax-6-10-None-3_850-10_2022-04-07T10-55-14.csv'
     # df_metrics.to_csv(file_name, index=False)
 
     # Initialize trading strategy (Neural Network ML model)
@@ -87,40 +91,38 @@ if __name__ == '__main__':
 
         # Prepare models for back testing
         child = copy.deepcopy(parent)
-        child.mutate()
+        child.mutate(alpha=0.3)
 
         # Create dataframes for child vs parent metric comparison
-        parent_sample_metrics = pd.DataFrame(columns=['ITERATION', 'SUPER_METRIC', 'ROI', 'WIN_RATIO', 'WINNER_ROI_AVG',
-                                                      'LOSER_ROI_AVG', 'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET',
-                                                      'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET',
-                                                      'RANGE_PORTFOLIO', 'CORR', 'NO_OF_TRADES'])
-        child_sample_metrics = pd.DataFrame(columns=['ITERATION', 'SUPER_METRIC', 'ROI', 'WIN_RATIO', 'WINNER_ROI_AVG',
-                                                     'LOSER_ROI_AVG', 'WINNER_ROI_MAX', 'LOSER_ROI_MAX', 'ROI_ASSET',
-                                                     'STD_DEV_ASSET', 'STD_DEV_PORTFOLIO', 'RANGE_ASSET',
-                                                     'RANGE_PORTFOLIO', 'CORR', 'NO_OF_TRADES'])
+        parent_sample_metrics = pd.DataFrame(columns=metric_names)
+        child_sample_metrics = pd.DataFrame(columns=metric_names)
 
         for s in range(sample_size):
 
             # select data for back testing
             file_index = np.random.randint(0, len(price_files))
-            df = pd.read_csv('C:/Users/chadg/GARD/Projects/slann/data/price/' + price_files[file_index],
-                             header=0)
+            df = pd.read_csv('C:/Users/chadg/GARD/Projects/slann/data/price/' + price_files[file_index], header=0)
+
+            df = df[~df['date'].str.contains('PM')]
+            df = df[~df['date'].str.contains('AM')]
             df['date'] = pd.to_datetime(df['date'])
-            df = df[df['date'] < datetime.datetime(2020, 1, 1, 0, 0, 0)]
+            df = df[df['date'] < datetime.datetime(2021, 1, 1, 0, 0, 0)]
 
             rows = len(df['close'].to_list())
             start = random.randint(0, rows - periods)
 
             df = df[start:start + periods]
-            df = df.sort_values(by=['Date'])
+            df = df.sort_values(by=['date'])
+            df = build_period(df)
 
             # prepare data and calculate indicators
             df = prepare_indicators(df)
             df = df.dropna()
-            df = df.drop(['unix', 'open', 'high', 'low', 'volume'], axis=1)
+            df = df[['date', 'symbol', 'close', 'bb_ratio', 'rsi_14', 'rsi_sma_diff',
+                     'aroon_up', 'aroon_dn', 'stoch_d']]
             df = df.reset_index(drop=True)
 
-            drop_columns = ['bb_ratio', 'rsi_500', 'aroon_up', 'aroon_dn', 'macd_signal', 'stoch_d']
+            drop_columns = ['bb_ratio', 'rsi_14', 'rsi_sma_diff', 'aroon_up', 'aroon_dn', 'stoch_d']
 
             # Back test parent strategy
             df_parent = back_test(df, parent, cash_initial=100000)
